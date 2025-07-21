@@ -19,6 +19,8 @@ public class AccountService {
     @Autowired
     private BankUserRepository bankUserRepository;
 
+    // TODO: Implementar validação de saldo mínimo para nova conta
+
     public Account accountCreate(String cpf, String accountNumber, BigDecimal balance){
         BankUser user = bankUserRepository.findByCpf(cpf)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
