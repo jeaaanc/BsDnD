@@ -1,6 +1,6 @@
 package BankSdNd.example.BsDnD.repository;
 
-import BankSdNd.example.BsDnD.model.BankUser;
+import BankSdNd.example.BsDnD.domain.BankUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

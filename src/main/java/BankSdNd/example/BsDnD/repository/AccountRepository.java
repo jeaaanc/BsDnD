@@ -1,6 +1,6 @@
 package BankSdNd.example.BsDnD.repository;
 
-import BankSdNd.example.BsDnD.model.Account;
+import BankSdNd.example.BsDnD.domain.Account;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

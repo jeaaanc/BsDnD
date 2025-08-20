@@ -1,6 +1,8 @@
-package BankSdNd.example.BsDnD.model;
+package BankSdNd.example.BsDnD.domain;
 
 import jakarta.persistence.*;
+
+import java.math.BigDecimal;
 
 
 @Entity
@@ -17,10 +19,20 @@ public class BankUser {
     private String cpf;
     @Column(name = "phone_number")
     private String phoneNumber;
-    @Column(name = "password")
+    @Column(name = "password", nullable = false)
     private String passWord;
 
+    @Column(name = "income", precision = 15, scale = 2)
+    private BigDecimal income;
     private BankUser(){}
+
+    public BigDecimal getIncome() {
+        return income;
+    }
+
+    public void setIncome(BigDecimal income) {
+        this.income = income;
+    }
 
     public String getName() {
         return name;
@@ -51,6 +63,7 @@ public class BankUser {
         private String name;
         private String lastName;
         private String cpf;
+        private BigDecimal income;
         private String phoneNumber;
         private String passWord;
 
@@ -66,6 +79,10 @@ public class BankUser {
             this.cpf = cpf;
             return this;
         }
+        public Builder income(BigDecimal income){
+            this.income = income;
+            return this;
+        }
         public Builder phoneNumber(String phoneNumber){
             this.phoneNumber = phoneNumber;
             return this;
@@ -79,6 +96,7 @@ public class BankUser {
             person.name = this.name;
             person.lastName = this.lastName;
             person.cpf = this.cpf;
+            person.income = this.income;
             person.phoneNumber = this.phoneNumber;
             person.passWord = this.passWord;
 

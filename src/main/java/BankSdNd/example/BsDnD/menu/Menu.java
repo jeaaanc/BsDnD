@@ -1,14 +1,14 @@
 package BankSdNd.example.BsDnD.menu;
 
-import BankSdNd.example.BsDnD.model.Account;
-import BankSdNd.example.BsDnD.model.BankUser;
+import BankSdNd.example.BsDnD.bank.BankProducts;
+import BankSdNd.example.BsDnD.controller.ConsoleController;
+import BankSdNd.example.BsDnD.domain.BankUser;
 import BankSdNd.example.BsDnD.service.AccountService;
 import BankSdNd.example.BsDnD.service.PersonService;
 
 import java.util.Scanner;
 
 public class Menu {
-
     private final PersonService personService;
     private final  AccountService accountService;
 
@@ -20,9 +20,11 @@ public class Menu {
     public void display(Scanner sc) {
         int firstOption = 0;
         int secondOption = 0;
-        do {
-            LoginMenu loginMenu = new LoginMenu(personService);
-            ClientMenu clientMenu = new ClientMenu();
+
+        while (true){
+            ConsoleController consoleController = new ConsoleController(personService, accountService);
+            AllMenu clientMenu = new AllMenu();
+            //menu principal
             clientMenu.firstDisplayMenu();
 
             firstOption = sc.nextInt();
@@ -30,16 +32,17 @@ public class Menu {
 
             switch (firstOption){
                 case 1:
-                    System.out.println("A 1 escolhido\n");
                     clientMenu.displayRegisterAll();
+
                     secondOption = sc.nextInt();
                     sc.nextLine();
                     switch (secondOption){
                         case 1:
-                            new Cadastro(personService).register(sc);
+                            new ConsoleController(personService,accountService).registerUser(sc);
                             break;
                         case 2:
-                            new AccountCreate(accountService).registerUserAccount(sc);
+                            //!!! preciso colocar user necessario para criar conta
+                            new ConsoleController(personService,accountService).registerUserAccount(accountService,sc);
                             break;
                         case 3:
                             System.out.println("Teste2");
@@ -50,12 +53,34 @@ public class Menu {
 
                     break;
                 case 2:
-                    BankUser confirmedClient = new LoginMenu(personService).displayLogin(sc);
-                    System.out.println(confirmedClient.getName());
-                    System.out.println("//escolhendo o cartao//");
-                    loginMenu.clientLoginConfirmedOptions(confirmedClient, accountService, sc);
+                    BankUser confirmedClient = new ConsoleController(personService, accountService).displayLogin(sc);
+                    do  {
+                        clientMenu.personChecked(confirmedClient);
+                        secondOption = sc.nextInt();
+                        sc.nextLine();
+                        switch (secondOption) {
+                            case 1:
+                                consoleController.balance(confirmedClient);
+                                break;
+                            case 2:
+                                consoleController.transfer(confirmedClient, sc);
+                                break;
+                            case 3:
+                                System.out.println("@@TESTE");
+                                BankProducts bankProducts = new BankProducts(accountService);
+                                bankProducts.moneyLoan(confirmedClient);
+                                break;
+                            default:
+                                System.out.println("Escolha uma das opções acima");
+                        }
+                        System.out.println("\n3 para sair / 0 para continuar ");
+                        firstOption = sc.nextInt();
+                        sc.nextLine();
+                    }while (firstOption != 3);
+
+                    System.out.println("\nProcesso finalizado!!!\n");
                     break;
             }
-        }while (firstOption !=3);
+        }
     }
 }

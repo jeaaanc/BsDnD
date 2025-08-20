@@ -1,20 +1,15 @@
 package BankSdNd.example.BsDnD.menu;
 
-import BankSdNd.example.BsDnD.model.Account;
-import BankSdNd.example.BsDnD.model.BankUser;
-import BankSdNd.example.BsDnD.service.AccountService;
+import BankSdNd.example.BsDnD.domain.BankUser;
 
-import java.util.List;
-import java.util.Scanner;
-
-public class ClientMenu {
+public class AllMenu {
 
     public void displayRegisterAll() {
         System.out.println("=====Cadastros=====");
         System.out.println("""
                 1- Cadastrar nova Pessoa.
                 2- Cadastrar nova Conta.
-                3- Cadastrar nova @@@
+                3- Fazer novo Pedido.
                 """);
     }
 
@@ -25,6 +20,15 @@ public class ClientMenu {
         System.out.println("1- Cadastros");
         System.out.println("2- Login");
         System.out.println("3- sair");
+    }
+
+    public void personChecked(BankUser clientConfirmed){
+        System.out.println("\nBem vindo: " + clientConfirmed.getName());
+        System.out.println("""
+                1- Saldo.
+                2- Transferência.
+                3- Empréstimo
+                """);
     }
 
 }
