@@ -1,27 +1,31 @@
 package BankSdNd.example.BsDnD.dto;
 
+import java.math.BigDecimal;
+
 public class PersonDto {
 
     private String name;
     private String lastName;
     private String cpf;
+    private BigDecimal income;
     private String phoneNumber;
-    private String password;
-    private String confirmedPassword;
+    private String rawpassword;
+    private String confirmedrawPassword;
 
-    public String getConfirmedPassword() {
-        return confirmedPassword;
+    public String getConfirmedrawPassword() {
+        return confirmedrawPassword;
     }
 
     public PersonDto(){}
 
-    public PersonDto(String name, String lastName, String cpf, String phoneNumber, String passWord, String confirmedPassword) {
+    public PersonDto(String name, String lastName, String cpf, BigDecimal income, String phoneNumber, String passWord, String confirmedPassword) {
         this.name = name;
         this.lastName = lastName;
         this.cpf = cpf;
+        this.income = income;
         this.phoneNumber = phoneNumber;
-        this.password = passWord;
-        this.confirmedPassword = confirmedPassword;
+        this.rawpassword = passWord;
+        this.confirmedrawPassword = confirmedPassword;
     }
 
     public String getName() {
@@ -40,7 +44,11 @@ public class PersonDto {
         return phoneNumber;
     }
 
-    public String getPassword() {
-        return password;
+    public String getRawpassword() {
+        return rawpassword;
+    }
+
+    public BigDecimal getIncome() {
+        return income;
     }
 }

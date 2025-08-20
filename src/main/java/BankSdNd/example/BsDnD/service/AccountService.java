@@ -1,7 +1,7 @@
 package BankSdNd.example.BsDnD.service;
 
-import BankSdNd.example.BsDnD.model.Account;
-import BankSdNd.example.BsDnD.model.BankUser;
+import BankSdNd.example.BsDnD.domain.Account;
+import BankSdNd.example.BsDnD.domain.BankUser;
 import BankSdNd.example.BsDnD.repository.AccountRepository;
 import BankSdNd.example.BsDnD.repository.BankUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +19,20 @@ public class AccountService {
     @Autowired
     private BankUserRepository bankUserRepository;
 
+    private static final BigDecimal FIXED_BONUS = new BigDecimal("300");
+    private static final BigDecimal VARIABLE_BONUS = new BigDecimal("0.3");
+
     // TODO: Implementar validação de saldo mínimo para nova conta
 
-    public Account accountCreate(String cpf, String accountNumber, BigDecimal balance){
+    public Account accountCreate(String cpf, String accountNumber){
         BankUser user = bankUserRepository.findByCpf(cpf)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
-        Account account = new Account(accountNumber, balance, user);
+
+        BigDecimal bonusvariable = user.getIncome().multiply(VARIABLE_BONUS);
+        BigDecimal initialBalance = FIXED_BONUS.add(bonusvariable);
+
+        Account account = new Account(accountNumber, user, initialBalance);
+
         return accountRepository.save(account);
     }
 
@@ -41,11 +49,7 @@ public class AccountService {
         }
         return accounts;
     }
-    //mudar o nome para ingles v
-    public Account transferenciaEntreContas(){
 
-        return null;
-    }
 
     @Transactional
     public void transfer(String originNumberAccount, String destinationAccountNumber, BigDecimal value){
@@ -63,11 +67,15 @@ public class AccountService {
              throw new RuntimeException("Saldo insuficiente na conta de origem.");
          }
 
-         origin.setBalance(origin.getBalance().subtract(value));
-         destination.setBalance(destination.getBalance().add(value));
+
+         origin.transferTo(destination, value);
+
+        System.out.println("\nTransferencia feita com sucesso\n");
 
          accountRepository.save(origin);
          accountRepository.save(destination);
 
     }
+
+    //Criar methodo para pedir a senha novamente
 }

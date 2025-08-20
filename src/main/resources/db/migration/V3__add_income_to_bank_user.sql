@@ -1,0 +1,2 @@
+ALTER TABLE bank_user
+ADD COLUMN income DECIMAL(15,2) NULL;
