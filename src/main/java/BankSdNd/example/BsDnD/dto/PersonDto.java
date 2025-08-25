@@ -18,12 +18,12 @@ public class PersonDto {
 
     public PersonDto(){}
 
-    public PersonDto(String name, String lastName, String cpf, BigDecimal income, String phoneNumber, String passWord, String confirmedPassword) {
+    public PersonDto(String name, String lastName, String cpf, String phoneNumber, BigDecimal income, String passWord, String confirmedPassword) {
         this.name = name;
         this.lastName = lastName;
         this.cpf = cpf;
-        this.income = income;
         this.phoneNumber = phoneNumber;
+        this.income = income;
         this.rawpassword = passWord;
         this.confirmedrawPassword = confirmedPassword;
     }

@@ -2,80 +2,104 @@ package BankSdNd.example.BsDnD.service;
 
 import BankSdNd.example.BsDnD.domain.Account;
 import BankSdNd.example.BsDnD.domain.BankUser;
+import BankSdNd.example.BsDnD.exception.business.AccountNotFoundException;
+import BankSdNd.example.BsDnD.exception.business.InsufficientBalanceException;
+import BankSdNd.example.BsDnD.exception.business.UnauthorizedOperationException;
+import BankSdNd.example.BsDnD.exception.business.UserNotFoundException;
 import BankSdNd.example.BsDnD.repository.AccountRepository;
 import BankSdNd.example.BsDnD.repository.BankUserRepository;
+import BankSdNd.example.BsDnD.util.AccountNumberGenerator;
+import BankSdNd.example.BsDnD.util.InputUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Scanner;
 
 @Service
 public class AccountService {
 
-    @Autowired
     private AccountRepository accountRepository;
-    @Autowired
     private BankUserRepository bankUserRepository;
+    private final AccountNumberGenerator accountNumberGenerator;
 
     private static final BigDecimal FIXED_BONUS = new BigDecimal("300");
     private static final BigDecimal VARIABLE_BONUS = new BigDecimal("0.3");
 
     // TODO: Implementar validação de saldo mínimo para nova conta
 
-    public Account accountCreate(String cpf, String accountNumber){
+    public AccountService(AccountRepository accountRepository,
+                          BankUserRepository bankUserRepository,
+                          AccountNumberGenerator accountNumberGenerator) {
+        this.accountRepository = accountRepository;
+        this.bankUserRepository = bankUserRepository;
+        this.accountNumberGenerator = accountNumberGenerator;
+    }
+
+    @Transactional
+    public Account accountCreate(String cpf){
         BankUser user = bankUserRepository.findByCpf(cpf)
-                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+                .orElseThrow(() -> new UserNotFoundException("Usuário com CPF " + cpf + " não encontrado"));
 
         BigDecimal bonusvariable = user.getIncome().multiply(VARIABLE_BONUS);
         BigDecimal initialBalance = FIXED_BONUS.add(bonusvariable);
 
+        String  accountNumber = accountNumberGenerator.generateUniqueAccountNumber();
         Account account = new Account(accountNumber, user, initialBalance);
 
         return accountRepository.save(account);
     }
 
+    //!!!!!olhar
     public Account loginByAccountNumber(String accountNumber){
         return accountRepository.findByAccountNumber(accountNumber)
-                .orElseThrow(() -> new RuntimeException("\nConta não encontrada"));
+                .orElseThrow(() -> new UserNotFoundException("\nConta: " + accountNumber + " não encontrada"));
     }
 
     public List<Account> searchClientAccount(String cpf){
         List<Account> accounts = accountRepository.findAllByCpf(cpf);
 
         if (accounts.isEmpty()){
-            throw new RuntimeException("Nenhuma conta encontrada neste CPF. ");
+            throw new UserNotFoundException("Nenhuma conta encontrada no CPF: " + cpf);
         }
         return accounts;
     }
 
-
+// arrumar as exception!!!!!!!!!!!
     @Transactional
     public void transfer(String originNumberAccount, String destinationAccountNumber, BigDecimal value){
          Account origin = accountRepository.findByAccountNumber(originNumberAccount)
-                 .orElseThrow(() -> new RuntimeException("Conta de origem não encontrada."));
+                 .orElseThrow(() -> new AccountNotFoundException("Conta: " + originNumberAccount +". Não encontrada!!!"));
 
          Account destination = accountRepository.findByAccountNumber(destinationAccountNumber)
-                 .orElseThrow(() -> new RuntimeException("Conta de destino não encontrada."));
+                 .orElseThrow(() -> new AccountNotFoundException("Conta de destino: " + originNumberAccount + ". Não encontrada"));
 
          if (value.compareTo(BigDecimal.ZERO) <= 0){
-             throw new RuntimeException("O valor da transferência deve ser maior que zero.");
+             throw new InsufficientBalanceException("O valor da transferência deve ser maior que 0.");
          }
 
          if (origin.getBalance().compareTo(value) < 0) {
-             throw new RuntimeException("Saldo insuficiente na conta de origem.");
+             throw new InsufficientBalanceException("Saldo insuficiente na conta.");
          }
 
 
          origin.transferTo(destination, value);
-
-        System.out.println("\nTransferencia feita com sucesso\n");
 
          accountRepository.save(origin);
          accountRepository.save(destination);
 
     }
 
+    public void validateAccountOwnership(Long userId, String accountNumber){
+        Account account = accountRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new AccountNotFoundException("Conta não encontrada!"));
+
+        if (!account.getTitular().getId().equals(userId)){
+            throw new UnauthorizedOperationException("Conta de origem não pertence ao usuário!");
+            //arrumar exception!!!!
+        }
+    }
     //Criar methodo para pedir a senha novamente
 }

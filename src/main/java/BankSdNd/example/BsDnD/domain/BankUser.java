@@ -63,8 +63,8 @@ public class BankUser {
         private String name;
         private String lastName;
         private String cpf;
-        private BigDecimal income;
         private String phoneNumber;
+        private BigDecimal income;
         private String passWord;
 
         public Builder name(String name){
@@ -79,12 +79,12 @@ public class BankUser {
             this.cpf = cpf;
             return this;
         }
-        public Builder income(BigDecimal income){
-            this.income = income;
-            return this;
-        }
         public Builder phoneNumber(String phoneNumber){
             this.phoneNumber = phoneNumber;
+            return this;
+        }
+        public Builder income(BigDecimal income){
+            this.income = income;
             return this;
         }
         public Builder passWord(String passWord){
@@ -96,17 +96,12 @@ public class BankUser {
             person.name = this.name;
             person.lastName = this.lastName;
             person.cpf = this.cpf;
-            person.income = this.income;
             person.phoneNumber = this.phoneNumber;
+            person.income = this.income;
             person.passWord = this.passWord;
 
             return person;
         }
 
-    }
-
-
-    public void info (){
-        System.out.println("\nNome: " + name + "\nSobrenome: " + lastName + "\nCPF: " + cpf + "\nTelefone: " + phoneNumber );
     }
 }

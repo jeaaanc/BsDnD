@@ -1,12 +1,13 @@
 package BankSdNd.example.BsDnD.service;
 
-import BankSdNd.example.BsDnD.dto.LoginDto;
 import BankSdNd.example.BsDnD.domain.BankUser;
 import BankSdNd.example.BsDnD.dto.PersonDto;
+import BankSdNd.example.BsDnD.exception.business.DuplicateException;
+import BankSdNd.example.BsDnD.exception.business.InvalidPasswordException;
 import BankSdNd.example.BsDnD.repository.BankUserRepository;
+import BankSdNd.example.BsDnD.util.CpfValidator;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 @Service
 public class PersonService {
@@ -24,16 +25,19 @@ public class PersonService {
 
     public BankUser savePerson (PersonDto dto) {
 
+        if (!CpfValidator.isValid(dto.getCpf())){
+            throw new IllegalArgumentException("CPF inválido");
+        }
         if (personRepository.existsByCpf(dto.getCpf())){
-            throw new RuntimeException("\nCPF já cadastrado\n");
+            throw new DuplicateException("CPF", dto.getCpf());
         }
 
         if (personRepository.existsByPhoneNumber(dto.getPhoneNumber())){
-            throw new RuntimeException("\nNúmero de telefone já cadastrado!!!!!\n");
+            throw new DuplicateException("Número de telefone", dto.getPhoneNumber());
         }
 
         if (!dto.getRawpassword().equals(dto.getConfirmedrawPassword())){
-            throw new IllegalArgumentException("As senhas não coincidem");
+            throw new InvalidPasswordException("As senhas não coincidem");
         }
 
         String encodedPassword = passwordEncoder.encode(dto.getRawpassword());
@@ -42,34 +46,18 @@ public class PersonService {
                 .name(dto.getName())
                 .lastName(dto.getLastName())
                 .cpf(dto.getCpf())
-                .income(dto.getIncome())
                 .phoneNumber(dto.getPhoneNumber())
+                .income(dto.getIncome())
                 .passWord(encodedPassword)
                 .build();
 
         return personRepository.save(person);
     }
 
-    public BankUser login (LoginDto dto){
-        Optional<BankUser> optional = personRepository.findByCpf(dto.getCpf());
-
-        if (optional.isEmpty()){
-            throw new IllegalArgumentException("\nCPF não encontrado\n");
-        }
-
-        BankUser person = optional.get();
-
-        if (!person.getPassword().equals(dto.getPassword())){
-            throw new IllegalArgumentException("\nSenha Incorreta\n");
-        }
-
-        return person;
-    }
-
+    //!!!!! suspeito
     public boolean checkUserPassword(Long userId, String rawPassword){
         BankUser user =personRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
         return passwordValidationService.validatePassword(rawPassword, user.getPassword());
     }
-
 }

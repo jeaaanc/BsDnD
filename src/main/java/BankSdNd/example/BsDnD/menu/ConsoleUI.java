@@ -2,7 +2,7 @@ package BankSdNd.example.BsDnD.menu;
 
 import BankSdNd.example.BsDnD.domain.BankUser;
 
-public class AllMenu {
+public class ConsoleUI {
 
     public void displayRegisterAll() {
         System.out.println("=====Cadastros=====");
@@ -29,6 +29,29 @@ public class AllMenu {
                 2- Transferência.
                 3- Empréstimo
                 """);
+    }
+
+    public void showTransferMenu(){
+        System.out.println("==== Transferência ====");
+    }
+
+    public void showCreateAccount(){
+        System.out.println("=======Create a new Account=======");
+    }
+
+    public void showDisplayLogin(){
+        System.out.println("\n========Login========\n");
+    }
+
+    public void showCreateUser(){
+        System.out.println("==== Criar novo usuário ====");
+    }
+    public void showSucess(String message){
+        System.out.println("" + message);
+    }
+
+    public void showError(String message){
+        System.out.println("" + message);
     }
 
 }

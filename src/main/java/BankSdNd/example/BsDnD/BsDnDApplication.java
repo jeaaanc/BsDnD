@@ -2,6 +2,7 @@ package BankSdNd.example.BsDnD;
 
 import BankSdNd.example.BsDnD.menu.Menu;
 import BankSdNd.example.BsDnD.service.AccountService;
+import BankSdNd.example.BsDnD.service.AuthService;
 import BankSdNd.example.BsDnD.service.PersonService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -17,13 +18,13 @@ public class BsDnDApplication {
 		SpringApplication.run(BsDnDApplication.class, args);
 	}
 	@Bean
-	CommandLineRunner run (PersonService personService, AccountService accountService){
+	CommandLineRunner run (PersonService personService, AccountService accountService, AuthService authService){
 		return args -> {
-			Scanner scanner = new Scanner(System.in);
-
-			Menu menu = new Menu(personService, accountService);
-			menu.display(scanner);
-			System.out.println("\nProcesso Finalizado\n");
+			try(Scanner scanner = new Scanner(System.in)) {
+				Menu menu = new Menu(personService, accountService, authService);
+				menu.display(scanner);
+				System.out.println("\nProcesso Finalizado\n");
+			}
 		};
 	}
 
