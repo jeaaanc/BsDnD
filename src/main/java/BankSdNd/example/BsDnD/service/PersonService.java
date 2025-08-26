@@ -6,6 +6,7 @@ import BankSdNd.example.BsDnD.exception.business.DuplicateException;
 import BankSdNd.example.BsDnD.exception.business.InvalidPasswordException;
 import BankSdNd.example.BsDnD.repository.BankUserRepository;
 import BankSdNd.example.BsDnD.util.CpfValidator;
+import BankSdNd.example.BsDnD.util.PhoneValidator;
 import org.springframework.stereotype.Service;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,9 +32,12 @@ public class PersonService {
         if (personRepository.existsByCpf(dto.getCpf())){
             throw new DuplicateException("CPF", dto.getCpf());
         }
-
+        // Decidir se usar Unique key no Banco
         if (personRepository.existsByPhoneNumber(dto.getPhoneNumber())){
             throw new DuplicateException("Número de telefone", dto.getPhoneNumber());
+        }
+        if (!PhoneValidator.isValidPhoneNumber(dto.getPhoneNumber())){
+            throw new IllegalArgumentException("Número de telefone inválido. Use DDD + número");
         }
 
         if (!dto.getRawpassword().equals(dto.getConfirmedrawPassword())){
