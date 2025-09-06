@@ -31,12 +31,15 @@ public class ConsoleUI {
                 """);
     }
 
+    public void showMoneyLoan(){
+        System.out.println("\n==== Empréstimo ====\n");
+    }
     public void showTransferMenu(){
         System.out.println("==== Transferência ====");
     }
 
     public void showCreateAccount(){
-        System.out.println("=======Create a new Account=======");
+        System.out.println("=======Criar Nova Conta=======");
     }
 
     public void showDisplayLogin(){

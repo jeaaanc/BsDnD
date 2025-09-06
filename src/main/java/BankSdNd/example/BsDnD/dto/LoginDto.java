@@ -1,10 +1,12 @@
 package BankSdNd.example.BsDnD.dto;
 
-public class LoginDto {
-    private String cpf;
-    private String rawPassword;
+import BankSdNd.example.BsDnD.util.SecurePasswordHolder;
 
-    public LoginDto(String cpf, String password) {
+public class LoginDto implements SecurePasswordHolder {
+    private final String cpf;
+    private final char[] rawPassword;
+
+    public LoginDto(String cpf, char[] password) {
         this.cpf = cpf;
         this.rawPassword = password;
     }
@@ -13,7 +15,7 @@ public class LoginDto {
         return cpf;
     }
 
-    public String getRawPassword() {
+    public char[] getRawPassword() {
         return rawPassword;
     }
 }

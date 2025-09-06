@@ -8,15 +8,12 @@ import BankSdNd.example.BsDnD.exception.business.UnauthorizedOperationException;
 import BankSdNd.example.BsDnD.exception.business.UserNotFoundException;
 import BankSdNd.example.BsDnD.repository.AccountRepository;
 import BankSdNd.example.BsDnD.repository.BankUserRepository;
-import BankSdNd.example.BsDnD.util.AccountNumberGenerator;
-import BankSdNd.example.BsDnD.util.InputUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import BankSdNd.example.BsDnD.util.validation.AccountNumberGenerator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Scanner;
 
 @Service
 public class AccountService {
@@ -27,7 +24,6 @@ public class AccountService {
 
     private static final BigDecimal FIXED_BONUS = new BigDecimal("300");
     private static final BigDecimal VARIABLE_BONUS = new BigDecimal("0.3");
-
     // TODO: Implementar validação de saldo mínimo para nova conta
 
     public AccountService(AccountRepository accountRepository,
@@ -70,26 +66,21 @@ public class AccountService {
 // arrumar as exception!!!!!!!!!!!
     @Transactional
     public void transfer(String originNumberAccount, String destinationAccountNumber, BigDecimal value){
+
+        if (value == null || value.compareTo(BigDecimal.ZERO) <= 0){
+            throw new InsufficientBalanceException("O valor da transferência deve ser maior que 0.");
+        }
+
          Account origin = accountRepository.findByAccountNumber(originNumberAccount)
                  .orElseThrow(() -> new AccountNotFoundException("Conta: " + originNumberAccount +". Não encontrada!!!"));
 
          Account destination = accountRepository.findByAccountNumber(destinationAccountNumber)
                  .orElseThrow(() -> new AccountNotFoundException("Conta de destino: " + originNumberAccount + ". Não encontrada"));
 
-         if (value.compareTo(BigDecimal.ZERO) <= 0){
-             throw new InsufficientBalanceException("O valor da transferência deve ser maior que 0.");
-         }
-
-         if (origin.getBalance().compareTo(value) < 0) {
-             throw new InsufficientBalanceException("Saldo insuficiente na conta.");
-         }
-
-
          origin.transferTo(destination, value);
 
-         accountRepository.save(origin);
-         accountRepository.save(destination);
-
+//         accountRepository.save(origin);
+//         accountRepository.save(destination);
     }
 
     public void validateAccountOwnership(Long userId, String accountNumber){
@@ -98,8 +89,7 @@ public class AccountService {
 
         if (!account.getTitular().getId().equals(userId)){
             throw new UnauthorizedOperationException("Conta de origem não pertence ao usuário!");
-            //arrumar exception!!!!
         }
     }
-    //Criar methodo para pedir a senha novamente
+
 }

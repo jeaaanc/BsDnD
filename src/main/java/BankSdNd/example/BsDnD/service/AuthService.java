@@ -23,28 +23,46 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public BankUser login(LoginDto dto){
-        BankUser user = userRepository.findByCpf(dto.getCpf())
-                .orElseThrow(() -> new UserNotFoundException(" Usuário com CPF: " + dto.getCpf() + " não encontrado"));
+    public BankUser login(LoginDto dto) {
+        try {
 
-        if (!passwordEncoder.matches(dto.getRawPassword(), user.getPassword())){
-            throw new InvalidPasswordException(" Senha incorreta");
+            if (dto == null || dto.getCpf() == null || dto.getCpf().trim().isEmpty()) {
+                throw new IllegalArgumentException("CPF é obrigatório.");// excptio!!!
+            }
+
+            if (dto.getRawPassword() == null || dto.getRawPassword().length == 0) {
+                throw new IllegalArgumentException("Senha é obrigatória.");//Exception
+            }
+
+            BankUser user = userRepository.findByCpf(dto.getCpf())
+                    .orElseThrow(() -> new UserNotFoundException("Usuário ou Senha incorreta"));
+
+            boolean matches = passwordEncoder.matches(new String(dto.getRawPassword()), user.getPassword());
+
+            if (!matches) {
+                throw new InvalidPasswordException("Usuário ou Senha incorreta");
+            }
+            return user;
+
+        } finally {
+
+            if (dto != null){
+                dto.clearPassword();
+            }
         }
-        return user;
-        }
-
-    public boolean verifyTransactionPassword(Long userId, String rawPassword){
-        BankUser user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(" Usuário não encontrado"));
-
-        return passwordEncoder.matches(rawPassword, user.getPassword());
     }
 
-    public void confirmTransactionPassword(Long userId, String rawPassword){
+    public void validatePassword(Long userId, char[] rawPassaword) {
 
-        boolean valid = verifyTransactionPassword(userId, rawPassword);
-        if (!valid){
-            throw new InvalidPasswordException("Senha incorreta! Tranferência cancelada.");
+        if (rawPassaword == null || rawPassaword.length == 0){
+            throw new InvalidPasswordException("A senha de confirmação não pode ser vazia.");
+        }
+
+        BankUser user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado para verificação."));
+
+        if (!passwordEncoder.matches(new String(rawPassaword), user.getPassword())) {
+            throw new InvalidPasswordException("Senha incorreta! Operação cancelada.");
         }
     }
 

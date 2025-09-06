@@ -1,4 +1,4 @@
-package BankSdNd.example.BsDnD.util;
+package BankSdNd.example.BsDnD.util.validation;
 
 public class PhoneValidator {
 

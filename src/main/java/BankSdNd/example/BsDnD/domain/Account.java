@@ -33,22 +33,27 @@ public class Account {
 
     public void deposit(BigDecimal amount) {
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0){
-            throw new IllegalArgumentException("Deposit must be greater than 0.");
+            throw new IllegalArgumentException("Deposito deve ser maior do que 0.");
         }
         this.balance = this.balance.add(amount);
     }
 
     public void withdraw(BigDecimal amount) {
+
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0){
-            throw new IllegalArgumentException("Withdrawal must be greater than 0.");
+
+            throw new IllegalArgumentException("Retirada deve ser maior que 0.");
         }
+
         if (balance.compareTo(amount) < 0){
-            throw  new IllegalArgumentException("Insufficient balance.");
+
+            throw  new IllegalArgumentException("Saldo insuficiente.");
         }
         this.balance = this.balance.subtract(amount);
     }
 
     public void transferTo(Account destination, BigDecimal amount){
+
         this.withdraw(amount);
         destination.deposit(amount);
     }

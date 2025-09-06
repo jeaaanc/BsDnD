@@ -7,53 +7,58 @@ import BankSdNd.example.BsDnD.service.AccountService;
 import BankSdNd.example.BsDnD.service.AuthService;
 import BankSdNd.example.BsDnD.service.PersonService;
 import BankSdNd.example.BsDnD.util.InputUtils;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Scanner;
 
 public class Menu {
     private final PersonService personService;
-    private final  AccountService accountService;
+    private final AccountService accountService;
     private final AuthService authService;
+    private final PasswordEncoder passwordEncoder;
 
-    public Menu(PersonService personService, AccountService accountService, AuthService authService ) {
+    public Menu(PersonService personService, AccountService accountService, AuthService authService, PasswordEncoder passwordEncoder) {
         this.personService = personService;
         this.accountService = accountService;
         this.authService = authService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public void display(Scanner sc) {
 
-        ConsoleController consoleController = new ConsoleController(personService, accountService, authService);
+        ConsoleController consoleController = new ConsoleController(personService, accountService, authService, passwordEncoder);
         ConsoleUI ui = new ConsoleUI();
         boolean running = true;
 
-        while (running){
+        while (running) {
             ui.firstDisplayMenu();
 
             int mainOption = InputUtils.readInt(sc, "Escolha uma Opção");
 
-            switch (mainOption){
+            switch (mainOption) {
                 case 1:
 
                     ui.displayRegisterAll();
                     int subOption = InputUtils.readInt(sc, "Escolha uma opção");
 
-                    switch (subOption){
+                    switch (subOption) {
                         case 1 -> consoleController.registerUser(sc, ui);
-                        case 2 -> consoleController.registerUserAccount(accountService,sc, ui);
+                        case 2 -> consoleController.registerUserAccount(accountService, sc, ui);
                         default -> ui.showError("Opção invalida");
                     }
                     break;
 
                 case 2:
                     BankUser client = consoleController.performLogin(sc, ui);
-                    if (client == null){
+
+                    if (client == null) {
                         ui.showError("\nLogin falhou!!!!!. Tente novamente.\n");
                         break;
                     }
+
                     boolean loggedIn = true;
 
-                    while (loggedIn){
+                    while (loggedIn) {
                         ui.personChecked(client);
                         int action = InputUtils.readInt(sc, "Escolha um opção");
 

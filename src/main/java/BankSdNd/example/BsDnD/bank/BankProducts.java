@@ -2,6 +2,7 @@ package BankSdNd.example.BsDnD.bank;
 
 import BankSdNd.example.BsDnD.domain.Account;
 import BankSdNd.example.BsDnD.domain.BankUser;
+import BankSdNd.example.BsDnD.menu.ConsoleUI;
 import BankSdNd.example.BsDnD.service.AccountService;
 
 import java.math.BigDecimal;
@@ -24,35 +25,25 @@ public class BankProducts {
 
 
     public void moneyLoan(BankUser clientConfirmed){
-        //  for every 100R$ get 1 PTS and for every 1PTS get 250R$ money loan.
+        // Para cada 100R$ ganhe 1 ponto para cada 1 ponto ganhe 250R$ para empréstimo.
+        ConsoleUI ui = new ConsoleUI();
+        ui.showMoneyLoan();
 
-        System.out.println("\n==== Empréstimo ====\n");
         List<Account> accounts = accountService.searchClientAccount(clientConfirmed.getCpf());
 
         BigDecimal totalBalance = BigDecimal.ZERO;
 
-
-
         for (int i = 0; i < accounts.size() ; i++) {
             Account acc = accounts.get(i);
-
-
             System.out.printf("\nConta: %d: %s: | Saldo: R$ %.2f%n",
                     i+1, acc.getAccountNumber(), acc.getBalance());
             totalBalance = totalBalance.add(acc.getBalance());
 
+
         }
         BigDecimal result = totalBalance.divide(ONE_HUNDRED, 2, RoundingMode.UP).multiply(TWO_HUNDRED);
         System.out.println("\nTotal Disponivel para Empréstimo: " + result);
-
         //acc.   setBalance(); !!!!  **** !!!!!
-
-
-//        BigDecimal porcentagem = new BigDecimal("30");
-//        BigDecimal total = new BigDecimal("500");
-//
-//        BigDecimal resultado = total.multiply(porcentagem).divide(CEM, 2, RoundingMode.HALF_UP);
-// Isso calcula 30% de 500 → resultado: 150.00
 
     }
 }

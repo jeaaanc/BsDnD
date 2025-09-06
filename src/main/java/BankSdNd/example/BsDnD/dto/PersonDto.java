@@ -9,23 +9,17 @@ public class PersonDto {
     private String cpf;
     private BigDecimal income;
     private String phoneNumber;
-    private String rawpassword;
-    private String confirmedrawPassword;
-
-    public String getConfirmedrawPassword() {
-        return confirmedrawPassword;
-    }
+    private String encodedPassword;
 
     public PersonDto(){}
 
-    public PersonDto(String name, String lastName, String cpf, String phoneNumber, BigDecimal income, String passWord, String confirmedPassword) {
+    public PersonDto(String name, String lastName, String cpf, String phoneNumber, BigDecimal income, String encodedPassword) {
         this.name = name;
         this.lastName = lastName;
         this.cpf = cpf;
         this.phoneNumber = phoneNumber;
         this.income = income;
-        this.rawpassword = passWord;
-        this.confirmedrawPassword = confirmedPassword;
+        this.encodedPassword = encodedPassword;
     }
 
     public String getName() {
@@ -44,8 +38,8 @@ public class PersonDto {
         return phoneNumber;
     }
 
-    public String getRawpassword() {
-        return rawpassword;
+    public String getEncodedPassword() {
+        return encodedPassword;
     }
 
     public BigDecimal getIncome() {

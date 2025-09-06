@@ -1,4 +1,4 @@
-package BankSdNd.example.BsDnD.util;
+package BankSdNd.example.BsDnD.util.validation;
 
 import BankSdNd.example.BsDnD.repository.AccountRepository;
 import org.springframework.stereotype.Component;
@@ -15,17 +15,22 @@ public class AccountNumberGenerator {
     }
 
     public static String generateBase(){
+
         int number = 10000000 + random.nextInt(90000000);
         return String.valueOf(number);
     }
 
     public String generateUniqueAccountNumber(){
+
         String accountNumber;
         do {
+
             String base = generateBase();
             char checkDigit = calculateCheckDigit(base);
             accountNumber = base + checkDigit;
+
         } while (accountRepository.existsByAccountNumber(accountNumber));
+
         return accountNumber;
     }
     public static char calculateCheckDigit(String base){
@@ -33,9 +38,11 @@ public class AccountNumberGenerator {
         int weight = 2;
 
         for (int i = base.length() - 1; i >= 0; i--) {
+
             int digit = base.charAt(i) - '0';
             sum += digit * weight;
             weight++;
+
             if (weight > 9) weight = 2;
         }
 

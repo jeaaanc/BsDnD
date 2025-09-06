@@ -3,10 +3,9 @@ package BankSdNd.example.BsDnD.service;
 import BankSdNd.example.BsDnD.domain.BankUser;
 import BankSdNd.example.BsDnD.dto.PersonDto;
 import BankSdNd.example.BsDnD.exception.business.DuplicateException;
-import BankSdNd.example.BsDnD.exception.business.InvalidPasswordException;
 import BankSdNd.example.BsDnD.repository.BankUserRepository;
-import BankSdNd.example.BsDnD.util.CpfValidator;
-import BankSdNd.example.BsDnD.util.PhoneValidator;
+import BankSdNd.example.BsDnD.util.validation.CpfValidator;
+import BankSdNd.example.BsDnD.util.validation.PhoneValidator;
 import org.springframework.stereotype.Service;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,6 +27,7 @@ public class PersonService {
 
         if (!CpfValidator.isValid(dto.getCpf())){
             throw new IllegalArgumentException("CPF inválido");
+            //^^ mudar o exception
         }
         if (personRepository.existsByCpf(dto.getCpf())){
             throw new DuplicateException("CPF", dto.getCpf());
@@ -38,13 +38,11 @@ public class PersonService {
         }
         if (!PhoneValidator.isValidPhoneNumber(dto.getPhoneNumber())){
             throw new IllegalArgumentException("Número de telefone inválido. Use DDD + número");
+            //^^ mudar o exception
         }
 
-        if (!dto.getRawpassword().equals(dto.getConfirmedrawPassword())){
-            throw new InvalidPasswordException("As senhas não coincidem");
-        }
 
-        String encodedPassword = passwordEncoder.encode(dto.getRawpassword());
+        String encodedPassword = passwordEncoder.encode(dto.getEncodedPassword());
 
         BankUser person = new BankUser.Builder()
                 .name(dto.getName())
@@ -60,8 +58,11 @@ public class PersonService {
 
     //!!!!! suspeito
     public boolean checkUserPassword(Long userId, String rawPassword){
+
         BankUser user =personRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
         return passwordValidationService.validatePassword(rawPassword, user.getPassword());
     }
+    // ^^ verifica se a senha bate com a senha hash do id ainda nao sei por que ta aqui
 }
