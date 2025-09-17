@@ -2,6 +2,7 @@ package BankSdNd.example.BsDnD.service;
 
 import BankSdNd.example.BsDnD.domain.Account;
 import BankSdNd.example.BsDnD.domain.BankUser;
+import BankSdNd.example.BsDnD.exception.business.LoanLimitExceededException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,9 +56,9 @@ public class LoanService {
 
         BigDecimal limit = calculateLoanLimit(user);
         if (requestedAmount.compareTo(limit) > 0) {
-            throw new IllegalArgumentException("O valor solicitado excede seu limite de empréstimo de R$ " + limit);
+            throw new LoanLimitExceededException("O valor solicitado excede seu limite de empréstimo de R$ " + limit);
         }
-        if (requestedAmount.compareTo(BigDecimal.ZERO) < 0){
+        if (requestedAmount.compareTo(BigDecimal.ZERO) <= 0){
             throw new IllegalArgumentException("O valor do empréstimo deve ser positivo.");
         }
         // Econtra a primeira conta do usuário para deposito o valor

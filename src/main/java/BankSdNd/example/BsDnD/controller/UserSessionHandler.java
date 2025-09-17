@@ -9,6 +9,7 @@ import BankSdNd.example.BsDnD.menu.ConsoleUI;
 import BankSdNd.example.BsDnD.service.AccountService;
 import BankSdNd.example.BsDnD.service.AuthService;
 import BankSdNd.example.BsDnD.service.LoanService;
+import BankSdNd.example.BsDnD.util.CurrencyUtils;
 import BankSdNd.example.BsDnD.util.InputUtils;
 import BankSdNd.example.BsDnD.util.PasswordUtils;
 
@@ -74,6 +75,9 @@ public class UserSessionHandler {
         BigDecimal limit = loanService.calculateLoanLimit(loggedInUser);
         //arrumar info ui !!!!
         ui.showMoneyLoan();
+
+        String formattedResult = CurrencyUtils.formatToBrazilianCurrency(limit);
+        System.out.println("\nLimite total para emprestimo: " + formattedResult + "\n");
 
         BigDecimal requesAmount = InputUtils.readBigDecimal(scanner, "Digite o valor que deseja solicitar" +
                 "(ou 0 para cancelar): ");

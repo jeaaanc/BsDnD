@@ -39,6 +39,7 @@ public class AuthService {
 
             boolean matches = passwordEncoder.matches(new String(dto.getRawPassword()), user.getPassword());
 
+
             if (!matches) {
                 throw new InvalidPasswordException("Usuário ou Senha incorreta");
             }

@@ -39,9 +39,7 @@ public class AuthenticationHandler {
             int choice = InputUtils.readInt(sc, "->");
             switch (choice){
                 case 0 -> ui.clearScreen();
-
                 case 1 -> registerUser(sc, ui);
-
                 case 9 -> {
                     ui.print("Voltando ao menu anterior.");
                     return;

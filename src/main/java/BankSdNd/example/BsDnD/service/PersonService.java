@@ -23,26 +23,23 @@ public class PersonService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public BankUser savePerson (PersonDto dto) {
+    public BankUser savePerson(PersonDto dto) {
 
-        if (!CpfValidator.isValid(dto.getCpf())){
+        if (!CpfValidator.isValid(dto.getCpf())) {
             throw new IllegalArgumentException("CPF inválido");
             //^^ mudar o exception
         }
-        if (personRepository.existsByCpf(dto.getCpf())){
+        if (personRepository.existsByCpf(dto.getCpf())) {
             throw new DuplicateException("CPF", dto.getCpf());
         }
 
-        if (personRepository.existsByPhoneNumber(dto.getPhoneNumber())){
+        if (personRepository.existsByPhoneNumber(dto.getPhoneNumber())) {
             throw new DuplicateException("Número de telefone", dto.getPhoneNumber());
         }
-        if (!PhoneValidator.isValidPhoneNumber(dto.getPhoneNumber())){
+        if (!PhoneValidator.isValidPhoneNumber(dto.getPhoneNumber())) {
             throw new IllegalArgumentException("Número de telefone inválido. Use DDD + número");
             //^^ mudar o exception
         }
-
-
-        String encodedPassword = passwordEncoder.encode(dto.getEncodedPassword());
 
         BankUser person = new BankUser.Builder()
                 .name(dto.getName())
@@ -50,19 +47,9 @@ public class PersonService {
                 .cpf(dto.getCpf())
                 .phoneNumber(dto.getPhoneNumber())
                 .income(dto.getIncome())
-                .passWord(encodedPassword)
+                .passWord(dto.getEncodedPassword())
                 .build();
 
         return personRepository.save(person);
     }
-
-    //!!!!! suspeito
-    public boolean checkUserPassword(Long userId, String rawPassword){
-
-        BankUser user =personRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-
-        return passwordValidationService.validatePassword(rawPassword, user.getPassword());
-    }
-    // ^^ verifica se a senha bate com a senha hash do id ainda nao sei por que ta aqui
 }

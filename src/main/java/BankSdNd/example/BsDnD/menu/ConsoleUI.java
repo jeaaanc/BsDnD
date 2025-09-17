@@ -8,8 +8,7 @@ public class ConsoleUI {
         System.out.println("=====Cadastros=====");
         System.out.println("""
                 1- Cadastrar nova Pessoa.
-                2- Cadastrar nova Conta.
-                3- Fazer novo Pedido.
+                2- Fazer novo Pedido.
                 9- sair.
                 0- Limpar a tela.
                 """);
