@@ -36,16 +36,16 @@ public class AuthenticationHandler {
         while (true) {
             ui.displayRegisterAll();
 
-            int choice = InputUtils.readInt(sc, "->");
+            int choice = InputUtils.readInt(sc, "Escolha uma Opção: ");
             switch (choice){
                 case 0 -> ui.clearScreen();
                 case 1 -> registerUser(sc, ui);
                 case 9 -> {
-                    ui.print("Voltando ao menu anterior.");
+                    ui.showMenuGoBack();
                     return;
                 }
 
-                default -> ui.showError("Escolha uma das opções acima");
+                default -> ui.showChoseOptions();
             }
         }
     }
@@ -60,24 +60,24 @@ public class AuthenticationHandler {
                 BankUser loggedUser = attemptLoginOnce(sc, ui);
 
                 if (loggedUser != null) {
-                    ui.showSucess("\nLogin Efetuado com sucesso!\n");
+                    ui.showLoginSuccessfully();
                     return loggedUser;
                 } else {
-                    ui.showError("\nLogin cancelado.");
+                    ui.showLoginCancelled();
                     return null;
                 }
             } catch (Exception e) {
 
                 attempts++;
-                ui.showError("\n #Erro " + e.getMessage());
+                ui.showValidationError(e.getMessage());
 
                 if (attempts < MAX_ATTEMPTS) {
-                    System.out.println("Você tem: " + (MAX_ATTEMPTS - attempts) + "Tentativa(s) restante(s).");
+                  ui.showAttemptsRemaining (MAX_ATTEMPTS - attempts);
                 }
             }
         }
 
-        System.out.println("\nNúmero máximo de " + MAX_ATTEMPTS + " tentativas atingidos.");
+        ui.showMaxAttemptsReached();
         return null;
     }
 
@@ -88,18 +88,17 @@ public class AuthenticationHandler {
             PersonDto dto = collector.collectUserInput(scanner);
 
             if (dto == null) {
-                ui.showError("\nCadastro cancelado.");
+                ui.showRegisterError();
                 return;
             }
 
             try {
                 BankUser person = personService.savePerson(dto);
-                System.out.println("\nNovo usuário criado com sucesso\n");
+                ui.showUserCreatedSuccessfully();
             } catch (IllegalArgumentException e) {
-                System.out.println("Erro em validação: " + e.getMessage());
+                ui.showValidationError(e.getMessage());
             }
     }
-
 
 
     private BankUser attemptLoginOnce(Scanner sc, ConsoleUI ui) {

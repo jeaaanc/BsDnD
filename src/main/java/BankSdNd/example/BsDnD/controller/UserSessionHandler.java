@@ -2,7 +2,6 @@ package BankSdNd.example.BsDnD.controller;
 
 import BankSdNd.example.BsDnD.domain.Account;
 import BankSdNd.example.BsDnD.domain.BankUser;
-import BankSdNd.example.BsDnD.dto.LoginDto;
 import BankSdNd.example.BsDnD.exception.business.InvalidPasswordException;
 import BankSdNd.example.BsDnD.exception.business.UserNotFoundException;
 import BankSdNd.example.BsDnD.menu.ConsoleUI;
@@ -24,18 +23,25 @@ public class UserSessionHandler {
     private final LoanService loanService;
     private final AuthService authService;
 
-    public UserSessionHandler(AccountService accountService, LoanService loanService, AuthService authService) {
+    private final Scanner sc;
+    private final ConsoleUI ui;
+    public UserSessionHandler(AccountService accountService, LoanService loanService,
+                              AuthService authService,
+                              Scanner scanner,
+                              ConsoleUI ui) {
         this.accountService = accountService;
         this.loanService = loanService;
         this.authService = authService;
+        this.sc = scanner;
+        this.ui = ui;
     }
 
-    public void runUserSession(BankUser loggedInUser, Scanner sc, ConsoleUI ui) {
+    public void runUserSession(BankUser loggedInUser) {
         boolean loggedIn = true;
 
         while (loggedIn) {
             ui.personChecked(loggedInUser);
-            int choice = InputUtils.readInt(sc, "Escolha uma opção");
+            int choice = InputUtils.readInt(sc, "Escolha uma opção: ");
             switch (choice) {
                 case 1 -> registerUserAccount(loggedInUser, sc, ui);
                 case 2 -> balance(loggedInUser);
@@ -43,7 +49,7 @@ public class UserSessionHandler {
                 case 4 -> handleLoanRequest(loggedInUser, sc, ui);
                 case 9 -> loggedIn = false;
                 case 0 -> ui.clearScreen();
-                default -> ui.showError("Escolha uma das opções acima");
+                default -> ui.showChoseOptions();
             }
         }
     }
@@ -53,20 +59,18 @@ public class UserSessionHandler {
 
         String cpf = InputUtils.readString(sc, "Seu CPF: ");
 
-        boolean isPasswordConfirmed = askConfirmTransactionPassword(loggedInUser);
-        if (!isPasswordConfirmed){
-            ui.showError("A confirmação da senha Falhou. Criação de conta cancelada.");
+        boolean isPasswordConfirmed = askConfirmTransactionPassword(loggedInUser, ui);
+        if (!isPasswordConfirmed) {
+            ui.accountShowPasswordValidation();
             return;
         }
 
         try {
-
             Account createdAccount = accountService.accountCreate(cpf);
+            ui.accountCreatedSuccessfully(createdAccount);
 
-            ui.showSucess("Conta criada com sucesso: " + createdAccount.getTitular().getName() + "\n");
         } catch (Exception e) {
-            //Exeption!!!
-            ui.showError("Erro: " + e.getMessage());
+            ui.accountValidationShowError(e.getMessage());
         }
     }
 
@@ -77,43 +81,42 @@ public class UserSessionHandler {
         ui.showMoneyLoan();
 
         String formattedResult = CurrencyUtils.formatToBrazilianCurrency(limit);
-        System.out.println("\nLimite total para emprestimo: " + formattedResult + "\n");
+        ui.loanShowLimitFormated(formattedResult);
 
         BigDecimal requesAmount = InputUtils.readBigDecimal(scanner, "Digite o valor que deseja solicitar" +
                 "(ou 0 para cancelar): ");
 
         if (requesAmount.compareTo(BigDecimal.ZERO) == 0) {
-            ui.print("Solicitação de empréstimo cancelada.");
+            ui.loanRequestShowCanceled();
             return;
         }
 
-        boolean isPasswordConfirmed = askConfirmTransactionPassword(loggedInUser);
+        boolean isPasswordConfirmed = askConfirmTransactionPassword(loggedInUser, ui);
         if (!isPasswordConfirmed) {
-            ui.showError("Confirmação de senha falhou. Solicitação cancelada.");
+            ui.showPasswordValidationError();
             return;
         }
 
         try {
             Account updateAccount = loanService.grantLoan(loggedInUser, requesAmount);
-            ui.showSucess("Emprestimo de R$" + requesAmount + " concedido com sucesso!");
-            ui.showSucess("Novo saldo na Conta " + updateAccount.getAccountNumber() + " : R$" + updateAccount.getBalance());
+            ui.showLoanSucess(updateAccount, requesAmount);
         } catch (Exception e) {
-            ui.showError("Não foi possivel conceder o empréstimo: " + e.getMessage());
+            ui.showResquestLoanErro(e.getMessage());
         }
     }
 
     public void showTransferForm(BankUser clientConfirmed, Scanner scanner, ConsoleUI ui) {
         ui.showTransferMenu();
 
-        boolean isPasswordIsConfirmed = askConfirmTransactionPassword(clientConfirmed);
+        boolean isPasswordIsConfirmed = askConfirmTransactionPassword(clientConfirmed, ui);
 
         if (!isPasswordIsConfirmed) {
-            ui.showError("Confirmação de senha Falhada. Tranferência cancelada. ");
+            ui.showTranferErroValidationPassword();
             return;
         }
 
         String accountOrigem = readAccountOrigem(clientConfirmed, scanner);
-        // !!!! processo para se errar a conta de origem
+
         String accountDestination = readContaDestino(scanner);
 
         BigDecimal valor = InputUtils.readBigDecimal(scanner, "Digite o valor da transferência: ");
@@ -121,38 +124,30 @@ public class UserSessionHandler {
         try {
 
             accountService.transfer(accountOrigem, accountDestination, valor);
-            ui.showSucess(" Transferência realizada com sucesso!");
+            ui.showTranferSuccessfully();
 
         } catch (InvalidPasswordException | IllegalArgumentException e) {
-            ui.showError("Erro ao transferir: " + e.getMessage());
+            ui.showErroTransfer(e.getMessage());
         }
     }
-
-
-    //Minha dica: se for manter com null, sempre documente no Javadoc que o método pode retornar null. Exemplo:
 
 
     public void balance(BankUser clientConfirmed) {
         List<Account> accounts = accountService.searchClientAccount(clientConfirmed.getCpf());
-        System.out.println("\nContas");
 
-        for (int i = 0; i < accounts.size(); i++) {
-            Account ac = accounts.get(i);
-            System.out.printf("\nConta: %d: %s: | Saldo: R$ %.2f%n", i + 1, ac.getAccountNumber(), ac.getBalance());
-        }
+        ui.displayAccountList(accounts);
     }
 
-    private boolean askConfirmTransactionPassword(BankUser user) {
+    private boolean askConfirmTransactionPassword(BankUser user, ConsoleUI ui) {
 
         char[] typedPassword = null;
         try {
-
-            System.out.println("\nPara continuar, por favor, confirme a sua senha.");
+            ui.showConfimedPassword();
 
             typedPassword = PasswordUtils.catchPassword("Senha: ");
 
             if (typedPassword == null || typedPassword.length == 0) {
-                System.out.println("Operação cancelada. Senha não fornecida.");
+                ui.showPasswordNull();
                 return false;
             }
 
@@ -160,7 +155,7 @@ public class UserSessionHandler {
             return true;
 
         } catch (InvalidPasswordException | UserNotFoundException e) {
-            System.out.println("Erro na confirmação: " + e.getMessage());
+            ui.showValidationError(e.getMessage());
             return false;
         } finally {
 

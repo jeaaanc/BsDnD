@@ -43,13 +43,14 @@ public class BsDnDApplication {
 				System.out.println("Iniciando em modo de interface de linha de comando (CLI)...\njava -jar target/BsDnD-0.0.1-SNAPSHOT.jar --cli");
 
 				try (Scanner scanner = new Scanner(System.in)) {
+                    ConsoleUI ui = new ConsoleUI();
+
 					AuthenticationHandler authenticationHandler = new AuthenticationHandler(authService, personService, passwordEncoder, accountService);
-					UserSessionHandler userSessionHandler = new UserSessionHandler(accountService, loanService, authService);
+					UserSessionHandler userSessionHandler = new UserSessionHandler(accountService, loanService, authService, scanner, ui);
 
-					ConsoleUI ui = new ConsoleUI();
-					ConsoleController controller = new ConsoleController(authenticationHandler, userSessionHandler);
+					ConsoleController controller = new ConsoleController(authenticationHandler, userSessionHandler, scanner, ui);
 
-					controller.display(scanner, ui);
+					controller.display();
 
 					System.out.println("\nProcesso Finalizado\n");
 				}

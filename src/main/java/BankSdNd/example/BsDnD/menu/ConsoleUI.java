@@ -1,6 +1,11 @@
 package BankSdNd.example.BsDnD.menu;
 
+import BankSdNd.example.BsDnD.domain.Account;
 import BankSdNd.example.BsDnD.domain.BankUser;
+import BankSdNd.example.BsDnD.util.CurrencyUtils;
+
+import java.math.BigDecimal;
+import java.util.List;
 
 public class ConsoleUI {
 
@@ -24,7 +29,7 @@ public class ConsoleUI {
         System.out.println("0- Limpar a tela.");
     }
 
-    public void personChecked(BankUser clientConfirmed){
+    public void personChecked(BankUser clientConfirmed) {
         System.out.println("\nBem vindo: " + clientConfirmed.getName());
         System.out.println("""
                 1- Criar conta.
@@ -36,36 +41,184 @@ public class ConsoleUI {
                 """);
     }
 
-    public void clearScreen(){
-            System.out.print("\033[H\033[2J");
-            System.out.flush();
+    public void clearScreen() {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
     }
 
-    public void showMoneyLoan(){
+    public void displayAccountList(List<Account> accounts){
+        System.out.println("\n===== Suas Contas =====\n");
+        if (accounts == null || accounts.isEmpty()){
+            System.out.println("Você ainda não possui contas bancárias.");
+
+        }else {
+            for (int i = 0; i < accounts.size(); i++) {
+                Account acc = accounts.get(i);
+
+                String formattedBalance = CurrencyUtils.formatToBrazilianCurrency(acc.getBalance());
+                System.out.printf(" %d: Conta %s | Saldo: %s%n",
+                        i+1,
+                        acc.getAccountNumber(),
+                        formattedBalance);
+            }
+        }
+        System.out.println("==================");
+    }
+
+    public void showMoneyLoan() {
         System.out.println("\n==== Empréstimo ====\n");
     }
-    public void showTransferMenu(){
+
+    public void showTransferMenu() {
         System.out.println("==== Transferência ====");
     }
 
-    public void showCreateAccount(){
+    public void showCreateAccount() {
         System.out.println("=======Criar Nova Conta=======");
     }
 
-    public void showDisplayLogin(){
+
+
+    // Login v
+
+    public void showDisplayLogin() {
         System.out.println("\n========Login========\n");
     }
 
-    public void showCreateUser(){
+    public void showLoginCancelled() {
+        System.out.println("\nLogin cancelado.");
+    }
+    public void showLoginSuccessfully(){
+        System.out.println("\nLogin Efetuado com sucesso\n");
+    }
+
+    public void showAttemptsRemaining(int remainingAttempts) {
+        System.out.println("\nVocê tem: " + remainingAttempts + " tentativa(s) restante(s).\n");
+    }
+
+    public void showMaxAttemptsReached(){
+        System.out.println("\nNúmero máximo de tentativas atingido. Acesso bloqueado");
+    }
+
+    // -----------------------------------------------
+
+
+    // Register User v
+
+    public void showCreateUser() {
         System.out.println("==== Criar novo usuário ====");
     }
-    public void showSucess(String message){
+
+    public void showUserCreatedSuccessfully(){
+        System.out.println("\nNovo usuário criado com sucesso\n");
+    }
+
+    public void showValidationError(String message){
+        System.out.println("\nErro em validação: " + message + "\n");
+    }
+
+    public void showRegisterError(){
+        System.out.println("\nCadastro cancelado.\n");
+    }
+
+    // -----------------------------------------------
+
+    // Account v
+
+    public void accountShowPasswordValidation (){
+        System.out.println("\nA confirmação da senha Falhou. Criação de conta cancelada.\n");
+    }
+
+    public void accountCreatedSuccessfully(Account account){
+        System.out.println("\nConta criada com sucesso: " + account.getTitular().getName() + "\n");
+    }
+
+    public void accountValidationShowError(String message){
+        System.out.println("\nErro: " + message + "\n");
+    }
+
+    // -----------------------------------------------
+
+    // Loan v
+    public void loanShowLimitFormated(String formattedResult){
+        System.out.println("\nLimite total para emprestimo: " + formattedResult + "\n");
+    }
+    public void loanRequestShowCanceled(){
+        System.out.println("\nSolicitação de empréstimo cancelada.\n");
+    }
+
+    public void showLoanSucess(Account updateAccount, BigDecimal requesAmount){
+
+        String formattedAmount = CurrencyUtils.formatToBrazilianCurrency(requesAmount);
+        String formattedNewBalance = CurrencyUtils.formatToBrazilianCurrency(updateAccount.getBalance());
+
+        System.out.println("\nEmpréstimo de " + formattedAmount + " concedido com sucesso!");
+        System.out.println("Novo saldo na Conta " + updateAccount.getAccountNumber() + ": " + formattedNewBalance);
+    }
+
+    public void showResquestLoanErro(String message){
+        System.out.println("\nNão foi possivel conceder o empréstimo: " + message + "\n");
+    }
+    // -----------------------------------------------
+
+    // Menus v
+
+    public void showMenuGoBack(){
+        System.out.println("\nVoltando ao menu anterior.\n");
+    }
+
+    public void showChoseOptions(){
+        System.out.println("\nEscolha uma das opções acima.\n");
+    }
+
+    public void showOptionInvalid(){
+        System.out.println("\nOpção inválida\n");
+    }
+
+    // -----------------------------------------------
+
+    // Tranfer v
+
+    public void showErroTransfer(String message){
+        System.out.println("\nErro ao transferir: " + message + "\n");
+    }
+
+    public void showTranferSuccessfully(){
+        System.out.println("\nTransferência realizada com sucesso.\n");
+    }
+
+    public void showTranferErroValidationPassword(){
+        System.out.println("\nConfirmação de senha Falhada. Tranferência cancelada.\n");
+    }
+
+    // -----------------------------------------------
+
+
+    // Password v
+
+    public void showPasswordValidationError () {
+        System.out.println("\nConfirmação de senha falhou.Solicitação cancelada.\n");
+    }
+
+    public void showConfimedPassword(){
+        System.out.println("\nPara continuar, por favor, confirme a sua senha.\n");
+    }
+
+    public void showPasswordNull(){
+        System.out.println("Operação cancelada. Senha não fornecida.");
+    }
+
+    // -----------------------------------------------
+
+
+    public void showSucess(String message) {
         System.out.println("" + message);
     }
 
-    public void showError(String message){
+    public void showError(String message) {
         System.out.println("" + message);
     }
+
     public void print(String message) {
         System.out.println("" + message);
     }

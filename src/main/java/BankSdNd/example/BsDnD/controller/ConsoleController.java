@@ -18,17 +18,22 @@ public class ConsoleController {
     private final AuthenticationHandler authHandler;
     private final UserSessionHandler userSessionHandler;
 
-    public ConsoleController(AuthenticationHandler authenticationHandler, UserSessionHandler userSessionHandler) {
+    private final Scanner sc;
+    private final ConsoleUI ui;
+
+    public ConsoleController(AuthenticationHandler authenticationHandler, UserSessionHandler userSessionHandler, Scanner sc, ConsoleUI ui) {
         this.authHandler = authenticationHandler;
         this.userSessionHandler = userSessionHandler;
+        this.sc = sc;
+        this.ui = ui;
     }
 
     /////                   vv--MENU--Principal--vv
-    public void display(Scanner sc, ConsoleUI ui) {
+    public void display() {
         while (true) {
             ui.firstDisplayMenu();
 
-            int choice = InputUtils.readInt(sc, "Escolha uma Opção");
+            int choice = InputUtils.readInt(sc, "Escolha uma Opção: ");
 
             switch (choice) {
                 case 0 -> ui.clearScreen();
@@ -36,14 +41,14 @@ public class ConsoleController {
                 case 2 -> {
                     BankUser user = authHandler.performLogin(sc, ui);
                     if (user != null) {
-                        userSessionHandler.runUserSession(user, sc, ui);
+                        userSessionHandler.runUserSession(user);
                     }
                 }
                 case 3 -> {
-                    ui.showError("Voltando ao menu anterior");
+                    ui.showMenuGoBack();
                     return;
                 }
-                default -> ui.showError("opção inválida");
+                default -> ui.showOptionInvalid();
             }
         }
     }

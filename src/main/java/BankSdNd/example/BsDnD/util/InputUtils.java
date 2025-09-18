@@ -6,7 +6,7 @@ import java.util.Scanner;
 public class InputUtils {
 
     public static String readString(Scanner sc, String mensagem) {
-        System.out.println(mensagem);
+        System.out.print(mensagem);
         return sc.nextLine();
     }
 
@@ -14,25 +14,28 @@ public class InputUtils {
         while (true) {
 
             try {
-                System.out.println(mensagem);
-                return Integer.parseInt(sc.nextLine());
+
+                System.out.print(mensagem);
+                int value = Integer.parseInt(sc.nextLine());
+                return value;
 
             } catch (NumberFormatException e) {
-                System.out.println("Entrada inválida. Digite um número Inteiro. ");
+                System.out.print("Entrada inválida. Digite um número Inteiro. ");
             }
         }
     }
 
     public static BigDecimal readBigDecimal(Scanner sc, String mensagem) {
         while (true) {
-
+            System.out.print(mensagem);
+            String input = sc.nextLine();
             try {
-                System.out.println(mensagem);
-                return new BigDecimal(sc.nextLine().replace(",", "."));
+                String noPoint = input.replace(".", "");
+                String formatJava = noPoint.replace(",", ".");
+                return new BigDecimal(formatJava);
 
             } catch (NumberFormatException e) {
-                System.out.println("Entrada inválida. Digite um valor numérico.");
-                sc.nextLine();
+                System.out.print("Entrada inválida. Digite um valor numérico.");
             }
         }
     }
