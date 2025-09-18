@@ -2,7 +2,8 @@
 
 > Projeto de estudo: sistema bancário simples em Java/Spring Boot para
 cadastro de usuários, criação de contas e operações básicas(depósito, saque, transferência).
-Feito para estudos e prática
+Feito para estudos e prática  
+>Obs: Projeto em andamento
 
 ## Sumário
 - [Tecnologias](#tecnologias)
