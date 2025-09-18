@@ -26,5 +26,11 @@ services:
     ports:
       - "8080:8080"
 
+    # Habilita o modo interativo para a aplicação CLI funcionar
+    stdin_open: true  # Permite que o Java Scanner receba input do teclado
+    tty: true         # Simula um terminal de verdade dentro do container
+    # A linha abaixo força o container a iniciar com a flag --cli
+    command: java -jar app.jar --cli
+
 volumes:
   db_data:

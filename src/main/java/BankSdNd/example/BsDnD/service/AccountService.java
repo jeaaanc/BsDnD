@@ -48,7 +48,6 @@ public class AccountService {
         return accountRepository.save(account);
     }
 
-    //!!!!!olhar
     public Account loginByAccountNumber(String accountNumber){
         return accountRepository.findByAccountNumber(accountNumber)
                 .orElseThrow(() -> new UserNotFoundException("\nConta: " + accountNumber + " não encontrada"));
@@ -63,7 +62,6 @@ public class AccountService {
         return accounts;
     }
 
-// arrumar as exception!!!!!!!!!!!
     @Transactional
     public void transfer(String originNumberAccount, String destinationAccountNumber, BigDecimal value){
 

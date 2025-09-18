@@ -20,7 +20,7 @@ public class Account {
     @JoinColumn(name = "user_id")
     private BankUser  titular;
 
-    public Account(){}
+    protected Account(){}
 
     public Account(String numberAccount, BankUser titular, BigDecimal initialDeposit) {
         this.accountNumber = numberAccount;

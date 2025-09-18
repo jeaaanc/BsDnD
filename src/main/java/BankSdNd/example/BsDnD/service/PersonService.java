@@ -27,7 +27,7 @@ public class PersonService {
 
         if (!CpfValidator.isValid(dto.getCpf())) {
             throw new IllegalArgumentException("CPF inválido");
-            //^^ mudar o exception
+
         }
         if (personRepository.existsByCpf(dto.getCpf())) {
             throw new DuplicateException("CPF", dto.getCpf());
@@ -38,7 +38,7 @@ public class PersonService {
         }
         if (!PhoneValidator.isValidPhoneNumber(dto.getPhoneNumber())) {
             throw new IllegalArgumentException("Número de telefone inválido. Use DDD + número");
-            //^^ mudar o exception
+
         }
 
         BankUser person = new BankUser.Builder()

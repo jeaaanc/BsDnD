@@ -24,7 +24,7 @@ public class BankUser {
 
     @Column(name = "income", precision = 15, scale = 2)
     private BigDecimal income;
-    private BankUser(){}
+    protected BankUser(){}
 
     public BigDecimal getIncome() {
         return income;

@@ -77,7 +77,7 @@ public class UserSessionHandler {
     public void handleLoanRequest(BankUser loggedInUser, Scanner scanner, ConsoleUI ui) {
 
         BigDecimal limit = loanService.calculateLoanLimit(loggedInUser);
-        //arrumar info ui !!!!
+
         ui.showMoneyLoan();
 
         String formattedResult = CurrencyUtils.formatToBrazilianCurrency(limit);
