@@ -26,6 +26,22 @@ public class BankUser {
     private BigDecimal income;
     protected BankUser(){}
 
+    public void setPassWord(String passWord) {
+        this.passWord = passWord;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public BigDecimal getIncome() {
         return income;
     }

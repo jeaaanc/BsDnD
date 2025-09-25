@@ -46,7 +46,7 @@ public class BsDnDApplication {
                     ConsoleUI ui = new ConsoleUI();
 
 					AuthenticationHandler authenticationHandler = new AuthenticationHandler(authService, personService, passwordEncoder, accountService);
-					UserSessionHandler userSessionHandler = new UserSessionHandler(accountService, loanService, authService, scanner, ui);
+					UserSessionHandler userSessionHandler = new UserSessionHandler(accountService, personService, loanService, authService, scanner, ui);
 
 					ConsoleController controller = new ConsoleController(authenticationHandler, userSessionHandler, scanner, ui);
 

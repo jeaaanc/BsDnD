@@ -9,7 +9,9 @@ import BankSdNd.example.BsDnD.repository.BankUserRepository;
 import BankSdNd.example.BsDnD.util.InputUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.Scanner;
 
 @Service
@@ -47,7 +49,7 @@ public class AuthService {
 
         } finally {
 
-            if (dto != null){
+            if (dto != null) {
                 dto.clearPassword();
             }
         }
@@ -55,7 +57,7 @@ public class AuthService {
 
     public void validatePassword(Long userId, char[] rawPassaword) {
 
-        if (rawPassaword == null || rawPassaword.length == 0){
+        if (rawPassaword == null || rawPassaword.length == 0) {
             throw new InvalidPasswordException("A senha de confirmação não pode ser vazia.");
         }
 
@@ -65,6 +67,28 @@ public class AuthService {
         if (!passwordEncoder.matches(new String(rawPassaword), user.getPassword())) {
             throw new InvalidPasswordException("Senha incorreta! Operação cancelada.");
         }
+    }
+
+    @Transactional
+    public void changePassword(Long userId, char[] oldPassword, char[] newPassword) {
+
+        if (oldPassword == null || oldPassword.length == 0 || newPassword == null || newPassword.length == 0) {
+            throw new IllegalArgumentException("Senha não podem ser vazias. ");
+        }
+        if (Arrays.equals(oldPassword, newPassword)){
+            throw new IllegalArgumentException("A nova senha não pode ser igual á antiga.");
+        }
+
+        BankUser user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado."));
+
+        if (!passwordEncoder.matches(new String(oldPassword), user.getPassword())){
+            throw new InvalidPasswordException("Senha Antiga incorreta. ");
+        }
+
+        String encodedNewPassword = passwordEncoder.encode(new String(newPassword));
+        user.setPassWord(encodedNewPassword);
+        userRepository.save(user);
     }
 
 }
