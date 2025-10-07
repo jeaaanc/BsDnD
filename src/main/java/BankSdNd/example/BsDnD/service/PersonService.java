@@ -7,32 +7,41 @@ import BankSdNd.example.BsDnD.exception.business.UserNotFoundException;
 import BankSdNd.example.BsDnD.repository.BankUserRepository;
 import BankSdNd.example.BsDnD.util.validation.CpfValidator;
 import BankSdNd.example.BsDnD.util.validation.PhoneValidator;
-import ch.qos.logback.core.util.StringUtil;
-
 import org.springframework.stereotype.Service;
-
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+
+
+/**
+ * Service class responsible for managing the personal data of {@link BankUser} entities.
+ *
+ * This service handles the creation of new users and the updating of their
+ * personal information, such as name and phone number, performing all necessary validations.
+ */
 @Service
 public class PersonService {
+
     private BankUserRepository personRepository;
 
-    private final PasswordValidationService passwordValidationService;
-    private final PasswordEncoder passwordEncoder;
-
-    public PersonService(BankUserRepository personRepository, PasswordValidationService passwordValidationService,
-                         PasswordEncoder passwordEncoder) {
+    public PersonService(BankUserRepository personRepository) {
         this.personRepository = personRepository;
-        this.passwordValidationService = passwordValidationService;
-        this.passwordEncoder = passwordEncoder;
     }
 
+
+    /**
+     * Creates and persists a new {@code BankUser} after validating the provided data.
+     * It expects the password in the DTO to be already encoded.
+     *
+     * @param dto The {@code PersonDto} containing the new user's information.
+     * @return The newly created and persisted {@code BankUser} entity.
+     * @throws IllegalArgumentException if the CPF or phone number format is invalid.
+     * @throws DuplicateException if the CPF or phone number already exists in the database.
+     */
     public BankUser savePerson(PersonDto dto) {
 
         if (!CpfValidator.isValid(dto.getCpf())) {
-            throw new IllegalArgumentException("CPF inválido");
+            throw new IllegalArgumentException("Invalid CPF");
 
         }
         if (personRepository.existsByCpf(dto.getCpf())) {
@@ -40,10 +49,10 @@ public class PersonService {
         }
 
         if (personRepository.existsByPhoneNumber(dto.getPhoneNumber())) {
-            throw new DuplicateException("Número de telefone", dto.getPhoneNumber());
+            throw new DuplicateException("Phone number", dto.getPhoneNumber());
         }
         if (!PhoneValidator.isValidPhoneNumber(dto.getPhoneNumber())) {
-            throw new IllegalArgumentException("Número de telefone inválido. Use DDD + número");
+            throw new IllegalArgumentException("Invalid phone number. Use area code DDD + number");
 
         }
 
@@ -59,32 +68,54 @@ public class PersonService {
         return personRepository.save(person);
     }
 
+    /**
+     * Updates an existing user's phone number after performing validations.
+     * This operation is transactional.
+     *
+     * @param userId The ID of the user to update.
+     * @param newPhoneNumber The new phone number to set.
+     * @return The updated {@code BankUser} entity.
+     * @throws UserNotFoundException if no user is found with the given ID.
+     * @throws IllegalArgumentException if the new phone number has an invalid format.
+     * @throws DuplicateException if the new phone number is already in use by another user.
+     */
     @Transactional
     public BankUser changePhoneNumber(Long userId, String newPhoneNumber) {
         // v exception
         if (!PhoneValidator.isValidPhoneNumber(newPhoneNumber)){
-            throw new IllegalArgumentException("Novo número de telefone inválido.");
+            throw new IllegalArgumentException("New phone number is invalid.");
         }
 
         if (personRepository.existsByPhoneNumber(newPhoneNumber)){
-            throw new DuplicateException("Número de telefone ", newPhoneNumber + " em uso.");
+            throw new DuplicateException("Phone number ", newPhoneNumber + " is already in use.");
         }
 
         BankUser user = personRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado. "));
+                .orElseThrow(() -> new UserNotFoundException("User not found."));
 
         user.setPhoneNumber(newPhoneNumber);
         return personRepository.save(user);
     }
 
+    /**
+     * Updates an existing user's first and last name.
+     * This operation is transactional.
+     *
+     * @param userId The ID of the user to update.
+     * @param newFirstName The new first name.
+     * @param newLastName The new last name.
+     * @return The updated {@code BankUser} entity.
+     * @throws UserNotFoundException if no user is found with the given ID.
+     * @throws IllegalArgumentException if the new first name or last name are null or empty.
+     */
     @Transactional
     public BankUser changeName(Long userId, String newFirstName, String newLastName){
 
         if (!StringUtils.hasText(newFirstName) || !StringUtils.hasText(newLastName)) {
-            throw new IllegalArgumentException("Nome e sobrenome não podem ser vazios.");
+            throw new IllegalArgumentException("First name and last name cannot be empty.");
         }
         BankUser user = personRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado."));
+                .orElseThrow(() -> new UserNotFoundException("User not found."));
 
         user.setName(newFirstName);
         user.setLastName(newLastName);

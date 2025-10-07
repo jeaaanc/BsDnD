@@ -1,6 +1,5 @@
 package BankSdNd.example.BsDnD.controller;
 
-import BankSdNd.example.BsDnD.domain.Account;
 import BankSdNd.example.BsDnD.domain.BankUser;
 import BankSdNd.example.BsDnD.dto.LoginDto;
 import BankSdNd.example.BsDnD.dto.PersonDto;
@@ -16,6 +15,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Arrays;
 import java.util.Scanner;
 
+/**
+ * Controller responsible for handling all pre-authentication user flows.
+ * This includes user registration, login attempts, and the associated sub-menus.
+ * It orchestrates calls to business services and the UI view.
+ */
 public class AuthenticationHandler {
     private final AuthService authService;
     private final PersonService personService;
@@ -31,6 +35,15 @@ public class AuthenticationHandler {
         this.accountService = accountService;
     }
 
+
+    /**
+     * Displays and manages the registration sub-menu.
+     * It presents options for creating new users and handles user navigation.
+     * The loop terminates when the user chooses to go back to the main menu.
+     *
+     * @param sc The {@code Scanner} instance for reading user input.
+     * @param ui The {@code ConsoleUI} instance for displaying all user-facing messages.
+     */
     public void showCreate(Scanner sc, ConsoleUI ui) {
 
         while (true) {
@@ -50,6 +63,16 @@ public class AuthenticationHandler {
         }
     }
 
+    /**
+     * Manages the complete user login flow, including handling multiple attempts.
+     * It orchestrates the UI display, input collection via helper methods, and calls
+     * the authentication service to validate credentials.
+     *
+     * @param sc The {@code Scanner} instance for user input.
+     * @param ui The {@code ConsoleUI} instance for displaying all user-facing messages.
+     * @return The authenticated {@code BankUser} if the login is successful, or {@code null} if the user
+     * cancels or exceeds the maximum attempts.
+     */
     public BankUser performLogin(Scanner sc, ConsoleUI ui) {
         int attempts = 0;
         final int MAX_ATTEMPTS = 3;
@@ -81,6 +104,13 @@ public class AuthenticationHandler {
         return null;
     }
 
+    /**
+     * Handles the user registration flow. It orchestrates the creation of an input collector,
+     * the gathering of user data, and the call to the person service to persist the new user.
+     *
+     * @param scanner The {@code Scanner} instance for user input.
+     * @param ui The {@code ConsoleUI} instance for displaying all user-facing messages.
+     */
     public void registerUser(Scanner scanner, ConsoleUI ui) {
             ui.showCreateUser();
 

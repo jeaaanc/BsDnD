@@ -5,25 +5,43 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 
 
+
+/**
+ * Represents a user (customer) of the bank.
+ *
+ * This is a JPA entity that maps to the {@code bank_user} table in the database.
+ * It contains the user's personal identification data, income information, and security credentials.
+ * Objects of this class are typically created using the nested {@link Builder}.
+ */
 @Entity
 @Table(name = "bank_user")
 public class BankUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private  Long id;
+
     @Column(name = "name")
     private String name;
+
     @Column(name = "lastname")
     private String lastName;
-    @Column(name = "cpf")
+
+    @Column(name = "cpf", unique = true, nullable = false)
     private String cpf;
-    @Column(name = "phone_number")
+
+    @Column(name = "phone_number", unique = true)
     private String phoneNumber;
+
     @Column(name = "password", nullable = false)
     private String passWord;
 
     @Column(name = "income", precision = 15, scale = 2)
     private BigDecimal income;
+
+    /**
+     * JPA-required constructor. Should not be used directly.
+     * Use the {@link Builder} to create new instances.
+     */
     protected BankUser(){}
 
     public void setPassWord(String passWord) {
@@ -75,6 +93,12 @@ public class BankUser {
         return id;
     }
 
+
+
+    /**
+     * The Builder class for creating {@link BankUser} instances.
+     * This follows the Builder design pattern to allow for clean and readable object creation.
+     */
     public static class Builder {
         private String name;
         private String lastName;
@@ -107,6 +131,11 @@ public class BankUser {
             this.passWord = passWord;
             return this;
         }
+
+        /**
+         * Builds and returns a new {@link BankUser} instance with the configured data.
+         * @return a new {@code BankUser} object.
+         */
         public BankUser build(){
             BankUser person = new BankUser();
             person.name = this.name;

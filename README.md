@@ -45,8 +45,8 @@ Este projeto foi construído com foco em boas práticas de engenharia de softwar
 * **Banco de Dados:** MySQL
 * **Build:** Maven
 * **Segurança:** Spring Security (PasswordEncoder)
-* **Migrações de Banco (Opcional):** Flyway
-* **Conteinerização (Opcional):** Docker, Docker Compose
+* **Migrações de Banco:** Flyway
+* **Conteinerização:** Docker, Docker Compose
 
 ## 🚀 Como Executar o Projeto
 
@@ -56,6 +56,7 @@ Siga os passos abaixo para configurar e executar a aplicação em seu ambiente l
 
 * [Java 17 (JDK)](https://adoptium.net/)
 * [Apache Maven](https://maven.apache.org/download.cgi)
+* [Git](https://git-scm.com/)
 * [MySQL Server](https://dev.mysql.com/downloads/mysql/)
 * (Opcional) [Docker](https://www.docker.com/products/docker-desktop/)
 
@@ -66,13 +67,15 @@ Siga os passos abaixo para configurar e executar a aplicação em seu ambiente l
     git clone [https://github.com/jeaaanc/BsDnD.git](https://github.com/jeaaanc/BsDnD.git)
     cd BsDnD
     ```
+
 2.  **Crie o Banco de Dados:**
-    Conecte-se ao seu MySQL e execute o seguinte comando:
+    Conecte-se ao seu servidor MySQL e execute o seguinte comando:
     ```sql
     CREATE DATABASE bsdnd CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
     ```
+
 3.  **Crie o arquivo de ambiente:**
-    Na raiz do projeto, crie um arquivo chamado `.env` e adicione suas credenciais do banco:
+    Na raiz do projeto (`BsDnD/`), crie um arquivo chamado `.env` e adicione suas credenciais do banco. O usuário definido (`DB_USER`) deve ter permissões no banco `bsdnd`.
     ```env
     DB_NAME=bsdnd
     DB_USER=seu_usuario_mysql
@@ -82,7 +85,7 @@ Siga os passos abaixo para configurar e executar a aplicação em seu ambiente l
 ### Opção 1: Rodando Localmente (Sem Docker)
 
 1.  **Compile e empacote o projeto:**
-    (Este comando também rodará os testes automatizados)
+    Este comando também rodará os testes automatizados.
     ```bash
     mvn clean package
     ```
@@ -94,10 +97,8 @@ Siga os passos abaixo para configurar e executar a aplicação em seu ambiente l
 
 ### Opção 2: Rodando com Docker
 
-Se você tiver o Docker e o Docker Compose instalados, o processo é mais simples.
-
-1.  **Garanta que o arquivo `.jar` foi gerado:**
-    Rode o comando de build do Maven pelo menos uma vez:
+1.  **Gere o arquivo `.jar`:**
+    O Docker precisa do arquivo `.jar` para construir a imagem. Rode o comando de build do Maven pelo menos uma vez:
     ```bash
     mvn clean package
     ```
@@ -106,13 +107,11 @@ Se você tiver o Docker e o Docker Compose instalados, o processo é mais simple
     ```bash
     docker-compose up --build
     ```
+    O menu interativo da aplicação aparecerá diretamente no seu terminal. Para parar os contêineres, pressione `Ctrl + C`.
 
-## 🗺️ Roadmap (Próximos Passos)
+## 🧪 Testes
 
-* [ ] Implementação da camada de **API REST** com endpoints para todas as funcionalidades.
-* [ ] Documentação da API com **Swagger/OpenAPI**.
-* [ ] Refinamento da UI de console e adição de mais funcionalidades.
-* [ ] Adição de mais testes de unidade e integração.
+O projeto possui um conjunto de testes de integração que é executado durante o build do Maven. Os testes rodam em um perfil "test" separado, utilizando um banco de dados em memória (H2) para garantir o isolamento e não afetar o banco de dados de desenvolvimento.
 
 ## ✒️ Autor
 

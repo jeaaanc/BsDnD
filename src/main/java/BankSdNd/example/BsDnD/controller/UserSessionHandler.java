@@ -18,6 +18,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Controller responsible for managing the application's flow and logic for an authenticated user.
+ * It handles the user session, displaying menus for logged-in actions and orchestrating
+ * calls to various business services.
+ */
 public class UserSessionHandler {
 
     private final AccountService accountService;
@@ -44,6 +49,13 @@ public class UserSessionHandler {
         this.ui = ui;
     }
 
+    /**
+     * Starts and manages the main loop for a logged-in user's session.
+     * This method displays the main menu of actions and delegates tasks to other handlers based on user input.
+     * The session ends when the user chooses to log out.
+     *
+     * @param loggedInUser The authenticated {@code BankUser} object representing the current user.
+     */
     public void runUserSession(BankUser loggedInUser) {
         this.currentUser = loggedInUser;
         boolean loggedIn = true;
@@ -68,7 +80,12 @@ public class UserSessionHandler {
         ui.showUserSessionExpired();
     }
 
-
+    /**
+     * Manages the user profile sub-menu, allowing the user to view their data or
+     * navigate to data-update functionalities.
+     *
+     * @return {@code true} to continue the user session, or {@code false} to signal a logout is required (e.g., after a password change).
+     */
     private boolean showUserProfile() {
         while (true) {
 
@@ -97,6 +114,10 @@ public class UserSessionHandler {
         }
     }
 
+    /**
+     * Handles the flow for creating a new bank account for the currently logged-in user.
+     * It orchestrates password re-authentication and calls the {@code AccountService}.
+     */
     public void registerUserAccount() {
         ui.showCreateAccount();
 
@@ -117,6 +138,10 @@ public class UserSessionHandler {
         }
     }
 
+    /**
+     * Handles the business flow for requesting a loan. It calculates the user's limit,
+     * prompts for the desired amount, re-authenticates the user, and calls the {@code LoanService}.
+     */
     public void handleLoanRequest() {
 
         BigDecimal limit = loanService.calculateLoanLimit(this.currentUser);
@@ -148,6 +173,10 @@ public class UserSessionHandler {
         }
     }
 
+    /**
+     * Manages the user flow for transferring money between accounts. It ensures the user
+     * re-authenticates and owns the source account before calling the {@code AccountService}.
+     */
     public void showTransferForm() {
         ui.showTransferMenu();
 
@@ -174,13 +203,21 @@ public class UserSessionHandler {
         }
     }
 
-
+    /**
+     * Fetches and orchestrates the display of all accounts and balances for the current user.
+     */
     public void balance() {
         List<Account> accounts = accountService.searchClientAccount(this.currentUser.getCpf());
 
         ui.displayAccountList(accounts);
     }
 
+    /**
+     * Prompts the user to re-enter their password to confirm a sensitive operation.
+     * Securely handles the password and calls the authentication service for validation.
+     *
+     * @return {@code true} if the password is correct, {@code false} otherwise.
+     */
     private boolean askConfirmTransactionPassword() {
 
         char[] typedPassword = null;
@@ -279,6 +316,7 @@ public class UserSessionHandler {
 
         try {
             while (true) {
+
                 newPassword = PasswordUtils.catchPassword("Digite sua NOVA senha: ");
                 if (newPassword == null) return null;
 

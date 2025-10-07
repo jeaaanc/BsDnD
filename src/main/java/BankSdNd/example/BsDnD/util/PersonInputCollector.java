@@ -7,13 +7,35 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Scanner;
 
+
+/**
+ * A helper class responsible for collecting all necessary user input
+ * for creating a new person ({@code BankUser}).
+ *
+ * It handles the entire interactive process, including secure password
+ * capture and confirmation, before packaging the data into a {@code PersonDto}.
+ * This class is not a Spring bean and must be instantiated manually.
+ */
 public class PersonInputCollector {
+
     private final PasswordEncoder passwordEncoder;
 
     public PersonInputCollector(PasswordEncoder passwordEncoder) {
         this.passwordEncoder = passwordEncoder;
     }
 
+
+
+    /**
+     * Orchestrates the step-by-step collection of a new user's data from the console.
+     *
+     * This method prompts the user for personal details and a confirmed password.
+     * The raw password is securely handled and cleared from memory upon completion.
+     *
+     * @param scanner The {@code Scanner} instance used to read user input.
+     * @return A {@code PersonDto} containing the collected user data with an already
+     * encoded password, or {@code null} if the user cancels the operation.
+     */
     public PersonDto collectUserInput(Scanner scanner) {
         String name = InputUtils.readString(scanner, "Nome: ");
         String lastName = InputUtils.readString(scanner, "Sobrenome: ");
@@ -40,6 +62,8 @@ public class PersonInputCollector {
             }
         }
     }
+
+
     private char[] collectAndConfirmPassword() {
         char[] rawPassword = null;
         char[] confirmedRawPassword = null;

@@ -4,6 +4,15 @@ import BankSdNd.example.BsDnD.repository.AccountRepository;
 import org.springframework.stereotype.Component;
 
 import java.security.SecureRandom;
+
+
+/**
+ * A Spring component responsible for generating unique bank account numbers.
+ *
+ * This class creates an 8-digit base number and appends a 1-digit check digit
+ * based on the "Módulo 11" algorithm. It ensures the final, generated number
+ * is unique by checking against the {@code AccountRepository}.
+ */
 @Component
 public class AccountNumberGenerator {
 
@@ -14,13 +23,16 @@ public class AccountNumberGenerator {
         this.accountRepository = accountRepository;
     }
 
-    public static String generateBase(){
 
-        int number = 10000000 + random.nextInt(90000000);
-        return String.valueOf(number);
-    }
-
-    public String generateUniqueAccountNumber(){
+    /**
+     * Generates a unique 9-digit bank account number as a String.
+     *
+     * The process loops until a number is found that does not already exist
+     * in the database, guaranteeing uniqueness.
+     *
+     * @return A {@code String} representing the unique 9-digit account number.
+     */
+    public String generateUniqueAccountNumber() {
 
         String accountNumber;
         do {
@@ -33,7 +45,14 @@ public class AccountNumberGenerator {
 
         return accountNumber;
     }
-    public static char calculateCheckDigit(String base){
+
+    private static String generateBase() {
+
+        int number = 10_000_000 + random.nextInt(90_000_000);
+        return String.valueOf(number);
+    }
+
+    private static char calculateCheckDigit(String base) {
         int sum = 0;
         int weight = 2;
 
@@ -53,9 +72,5 @@ public class AccountNumberGenerator {
 
     }
 
-    public static String generateAccountNumber(){
-        String base = generateBase();
-        char checkDigit = calculateCheckDigit(base);
-        return base + "-" + checkDigit;
-    }
+
 }

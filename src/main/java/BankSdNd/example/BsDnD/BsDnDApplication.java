@@ -8,7 +8,6 @@ import BankSdNd.example.BsDnD.service.AccountService;
 import BankSdNd.example.BsDnD.service.AuthService;
 import BankSdNd.example.BsDnD.service.LoanService;
 import BankSdNd.example.BsDnD.service.PersonService;
-import BankSdNd.example.BsDnD.util.PersonInputCollector;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;

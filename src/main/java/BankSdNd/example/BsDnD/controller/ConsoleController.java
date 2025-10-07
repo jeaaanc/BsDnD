@@ -1,18 +1,15 @@
 package BankSdNd.example.BsDnD.controller;
 
-import BankSdNd.example.BsDnD.domain.Account;
 import BankSdNd.example.BsDnD.domain.BankUser;
-import BankSdNd.example.BsDnD.dto.LoginDto;
-import BankSdNd.example.BsDnD.exception.business.InvalidPasswordException;
-import BankSdNd.example.BsDnD.exception.business.UserNotFoundException;
 import BankSdNd.example.BsDnD.menu.ConsoleUI;
-import BankSdNd.example.BsDnD.service.AccountService;
 import BankSdNd.example.BsDnD.util.InputUtils;
-import BankSdNd.example.BsDnD.util.PasswordUtils;
-
-import java.util.Arrays;
 import java.util.Scanner;
 
+/**
+ * The main controller for the console application.
+ * This class acts as the primary entry point for the user interface,
+ * orchestrating the main menu and delegating actions to specialized handlers.
+ */
 public class ConsoleController {
 
     private final AuthenticationHandler authHandler;
@@ -28,7 +25,13 @@ public class ConsoleController {
         this.ui = ui;
     }
 
-    /////                   vv--MENU--Principal--vv
+
+    /**
+     * Starts and manages the main application loop.
+     * It displays the initial menu (e.g., Register, Login, Exit) and waits for user input,
+     * dispatching the chosen action to the appropriate handler. This loop runs until the
+     * user chooses to exit the application.
+     */
     public void display() {
         while (true) {
             ui.firstDisplayMenu();
