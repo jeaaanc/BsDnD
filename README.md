@@ -4,7 +4,7 @@
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.3-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Maven](https://img.shields.io/badge/Maven-3.9-orange.svg)](https://maven.apache.org/)
 
-## 📜 Sobre o Projeto
+##  Sobre o Projeto
 
 **BsDnD** é um projeto de estudos focado na construção de um sistema bancário simulado, desenvolvido com Java e Spring Boot. O projeto nasceu como uma **aplicação de linha de comando (CLI)** robusta, com o objetivo de solidificar conceitos fundamentais de backend, como segurança, design de software e arquitetura em camadas.
 
@@ -12,7 +12,7 @@ O objetivo principal é a **evolução contínua**. A base de código foi projet
 
 Este repositório serve como um portfólio dinâmico, demonstrando não apenas o produto final, mas o processo de refatoração, a aplicação de boas práticas e a evolução arquitetural de um sistema.
 
-## ✨ Funcionalidades Atuais (Modo CLI)
+##  Funcionalidades Atuais (Modo CLI)
 
 * **Gestão de Usuários:** Cadastro e autenticação de novos usuários.
 * **Gestão de Contas:** Abertura de contas bancárias associadas a um usuário.
@@ -27,7 +27,7 @@ Este repositório serve como um portfólio dinâmico, demonstrando não apenas o
     * Armazenamento de senhas com criptografia BCrypt.
     * Re-autenticação por senha para operações sensíveis.
 
-## 🏛️ Arquitetura e Princípios de Design
+##  Arquitetura e Princípios de Design
 
 Este projeto foi construído com foco em boas práticas de engenharia de software:
 
@@ -38,7 +38,7 @@ Este projeto foi construído com foco em boas práticas de engenharia de softwar
 * **Tratamento de Erros Robusto:** Uso de uma hierarquia de exceções customizadas (`BusinessException`) para erros de negócio.
 * **Ambientes Separados:** Configuração de testes com um perfil (`test`) e banco de dados em memória (H2) para isolamento.
 
-## 🛠️ Tecnologias Utilizadas
+##  Tecnologias Utilizadas
 
 * **Backend:** Java 17, Spring Boot
 * **Persistência:** Spring Data JPA, Hibernate
@@ -48,7 +48,7 @@ Este projeto foi construído com foco em boas práticas de engenharia de softwar
 * **Migrações de Banco:** Flyway
 * **Conteinerização:** Docker, Docker Compose
 
-## 🚀 Como Executar o Projeto
+##  Como Executar o Projeto
 
 Siga os passos abaixo para configurar e executar a aplicação em seu ambiente local.
 
@@ -109,10 +109,10 @@ Siga os passos abaixo para configurar e executar a aplicação em seu ambiente l
     ```
     O menu interativo da aplicação aparecerá diretamente no seu terminal. Para parar os contêineres, pressione `Ctrl + C`.
 
-## 🧪 Testes
+##  Testes
 
 O projeto possui um conjunto de testes de integração que é executado durante o build do Maven. Os testes rodam em um perfil "test" separado, utilizando um banco de dados em memória (H2) para garantir o isolamento e não afetar o banco de dados de desenvolvimento.
 
-## ✒️ Autor
+##  Autor
 
 * **Jean da Cruz Silva** - [GitHub](https://github.com/jeaaanc)

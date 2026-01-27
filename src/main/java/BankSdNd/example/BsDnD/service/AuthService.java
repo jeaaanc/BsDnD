@@ -9,9 +9,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-
-
 
 /**
  * Service class responsible for user authentication and credential management.
@@ -33,43 +30,34 @@ public class AuthService {
     }
 
     /**
-     * Authenticates a user based on the provided CPF and password, ensuring that
-     * the password is cleared from memory after the operation.
+     * Authenticates a user based on the provided CPF and password.
      *
-     * @param dto the {@code LoginDto} object containing the CPF and the raw password (as {@code char[]}). Must not be null.
+     * @param dto the {@code LoginDto} object containing the CPF and the raw password. Must not be null.
      * @return the complete {@code BankUser} object if authentication is successful.
      * @throws UserNotFoundException    if no user is found with the provided CPF.
      * @throws InvalidPasswordException if the provided password does not match the stored password.
      * @throws IllegalArgumentException if the CPF or password in the DTO are null or empty.
      */
     public BankUser login(LoginDto dto) {
-        try {
 
-            if (dto == null || dto.getCpf() == null || dto.getCpf().trim().isEmpty()) {
+            if (dto == null || dto.cpf() == null || dto.cpf().isBlank()) {
                 throw new IllegalArgumentException("CPF is required.");// excptio!!!
             }
 
-            if (dto.getRawPassword() == null || dto.getRawPassword().length == 0) {
+            if (dto.password() == null || dto.password().isBlank()) {
                 throw new IllegalArgumentException("Password is required.");//Exception
             }
 
-            BankUser user = userRepository.findByCpf(dto.getCpf())
+            BankUser user = userRepository.findByCpf(dto.cpf())
                     .orElseThrow(() -> new UserNotFoundException("Incorrect user or password."));
 
-            boolean matches = passwordEncoder.matches(new String(dto.getRawPassword()), user.getPassword());
-
+            boolean matches = passwordEncoder.matches(dto.password(), user.getPassword());
 
             if (!matches) {
                 throw new InvalidPasswordException("Incorrect user or password.");
             }
+
             return user;
-
-        } finally {
-
-            if (dto != null) {
-                dto.clearPassword();
-            }
-        }
     }
 
     /**
@@ -78,20 +66,20 @@ public class AuthService {
      * The method completes successfully if the password is valid.
      *
      * @param userId The ID of the user whose password is to be validated. Must not be null.
-     * @param rawPassword The raw password, as a char array, to be checked. Must not be null or empty.
+     * @param rawPassword The raw password to be checked. Must not be null or empty.
      * @throws UserNotFoundException if no user is found for the given {@code userId}.
      * @throws InvalidPasswordException if the provided {@code rawPassword} is empty or does not match the user's stored password.
      */
-    public void validatePassword(Long userId, char[] rawPassword) {
+    public void validatePassword(Long userId, String rawPassword) {
 
-        if (rawPassword == null || rawPassword.length == 0) {
+        if (rawPassword == null || rawPassword.isBlank()) {
             throw new InvalidPasswordException("Confirmation password cannot be empty.");
         }
 
         BankUser user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found for verification."));
 
-        if (!passwordEncoder.matches(new String(rawPassword), user.getPassword())) {
+        if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
             throw new InvalidPasswordException("Incorrect password! Operation canceled.");
         }
     }
@@ -101,31 +89,32 @@ public class AuthService {
      * The operation is transactional, ensuring that the change only completes if all steps are successful.
      *
      * @param userId The ID of the user whose password is to be changed.
-     * @param oldPassword The user's current (old) password, as a char array.
-     * @param newPassword The user's new password, as a char array.
+     * @param oldPassword The user's current (old) password.
+     * @param newPassword The user's new password.
      * @throws UserNotFoundException if no user is found for the given {@code userId}.
      * @throws InvalidPasswordException if the provided {@code oldPassword} does not match the stored password.
      * @throws IllegalArgumentException if any of the passwords are null/empty, or if the new password is the same as the old one.
      */
     @Transactional
-    public void changePassword(Long userId, char[] oldPassword, char[] newPassword) {
+    public void changePassword(Long userId, String oldPassword, String newPassword) {
 
-        if (oldPassword == null || oldPassword.length == 0 || newPassword == null || newPassword.length == 0) {
+        if (oldPassword == null || oldPassword.isBlank() || newPassword == null || newPassword.isBlank()) {
             throw new IllegalArgumentException("Passwords cannot be empty.");
         }
-        if (Arrays.equals(oldPassword, newPassword)) {
+        if (oldPassword.equals(newPassword)) {
             throw new IllegalArgumentException("The new password cannot be the same as the old one.");
         }
 
         BankUser user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found."));
 
-        if (!passwordEncoder.matches(new String(oldPassword), user.getPassword())) {
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
             throw new InvalidPasswordException("Old password is incorrect.");
         }
 
-        String encodedNewPassword = passwordEncoder.encode(new String(newPassword));
-        user.setPassWord(encodedNewPassword);
+        String encodedNewPassword = passwordEncoder.encode(newPassword);
+
+        user.setPassword(encodedNewPassword);
         userRepository.save(user);
     }
 

@@ -1,4 +1,4 @@
-package BankSdNd.example.BsDnD.controller;
+package BankSdNd.example.BsDnD.controller.cli;
 
 import BankSdNd.example.BsDnD.domain.BankUser;
 import BankSdNd.example.BsDnD.menu.ConsoleUI;

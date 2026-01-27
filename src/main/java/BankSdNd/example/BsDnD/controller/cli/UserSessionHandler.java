@@ -1,4 +1,4 @@
-package BankSdNd.example.BsDnD.controller;
+package BankSdNd.example.BsDnD.controller.cli;
 
 import BankSdNd.example.BsDnD.domain.Account;
 import BankSdNd.example.BsDnD.domain.BankUser;
@@ -220,18 +220,21 @@ public class UserSessionHandler {
      */
     private boolean askConfirmTransactionPassword() {
 
-        char[] typedPassword = null;
+        char[] rawPassword = null;
+
         try {
             ui.showConfimedPassword();
 
-            typedPassword = PasswordUtils.catchPassword("Senha: ");
+            rawPassword = PasswordUtils.catchPassword("Senha: ");
 
-            if (typedPassword == null || typedPassword.length == 0) {
+            if (rawPassword == null || rawPassword.length == 0) {
                 ui.showPasswordNull();
                 return false;
             }
 
-            authService.validatePassword(this.currentUser.getId(), typedPassword);
+            String passwordString = new String(rawPassword);
+
+            authService.validatePassword(this.currentUser.getId(), passwordString);
             return true;
 
         } catch (InvalidPasswordException | UserNotFoundException e) {
@@ -239,8 +242,8 @@ public class UserSessionHandler {
             return false;
         } finally {
 
-            if (typedPassword != null) {
-                Arrays.fill(typedPassword, '\0');
+            if (rawPassword != null) {
+                Arrays.fill(rawPassword, '\0');
             }
         }
     }
@@ -261,24 +264,26 @@ public class UserSessionHandler {
     private boolean handleChangePassword() {
         ui.showChangePasswordScreen();
 
-        char[] oldPassword = null;
-        char[] newPassword = null;
+        char[] rawOldPassword = null;
 
         try {
 
-            oldPassword = PasswordUtils.catchPassword("Digite sua senha ANTIGA: ");
-            if (oldPassword == null) {
+            rawOldPassword = PasswordUtils.catchPassword("Digite sua senha ANTIGA: ");
+            if (rawOldPassword == null) {
                 ui.showPasswordNull();
                 return false;
             }
 
-            newPassword = askForNewConfirmedPassword();
+            String newPassword = askForNewConfirmedPassword();
+
             if (newPassword == null) {
                 ui.showPasswordNull();
                 return false;
             }
 
-            authService.changePassword(this.currentUser.getId(), oldPassword, newPassword);
+            String oldPasswordString = new String(rawOldPassword);
+
+            authService.changePassword(this.currentUser.getId(), oldPasswordString, newPassword);
             ui.showProfilePasswordChangeSuccessfully();
             return true;
 
@@ -288,8 +293,7 @@ public class UserSessionHandler {
             return false;
         } finally {
 
-            if (oldPassword != null) Arrays.fill(oldPassword, '\0');
-            if (newPassword != null) Arrays.fill(newPassword, '\0');
+            if (rawOldPassword != null) Arrays.fill(rawOldPassword, '\0');
         }
     }
 
@@ -310,7 +314,7 @@ public class UserSessionHandler {
         }
     }
 
-    private char[] askForNewConfirmedPassword() {
+    private String askForNewConfirmedPassword() {
         char[] newPassword = null;
         char[] newPasswordConfirmation = null;
 
@@ -327,7 +331,13 @@ public class UserSessionHandler {
                 }
 
                 if (Arrays.equals(newPassword, newPasswordConfirmation)) {
-                    return newPassword;
+
+                    String finalPassword = new String(newPassword);
+
+                    Arrays.fill(newPassword, '\0');
+                    Arrays.fill(newPasswordConfirmation, '\0');
+
+                    return finalPassword;
                 }
 
                 ui.showProfilePasswordMismatch();
@@ -340,8 +350,11 @@ public class UserSessionHandler {
                 }
             }
 
-        } finally {
+        } catch (Exception e){
+            if (newPassword != null) Arrays.fill(newPassword, '\0');
             if (newPasswordConfirmation != null) Arrays.fill(newPasswordConfirmation, '\0');
+
+            throw  e;
         }
 
     }
