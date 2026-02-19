@@ -71,6 +71,7 @@ public class UserSessionHandler {
                 case 3 -> showTransferForm();
                 case 4 -> handleLoanRequest();
                 case 5 -> loggedIn = showUserProfile();
+                case 6 -> handleAccountDeletion();
                 case 9 -> loggedIn = false;
                 case 0 -> ui.clearScreen();
                 default -> ui.showChoseOptions();
@@ -350,11 +351,11 @@ public class UserSessionHandler {
                 }
             }
 
-        } catch (Exception e){
+        } catch (Exception e) {
             if (newPassword != null) Arrays.fill(newPassword, '\0');
             if (newPasswordConfirmation != null) Arrays.fill(newPasswordConfirmation, '\0');
 
-            throw  e;
+            throw e;
         }
 
     }
@@ -386,5 +387,26 @@ public class UserSessionHandler {
     private void viewAccountBalance() {
         balance();
         InputUtils.readString(sc, "Pressione Enter para voltar ao menu");
+    }
+
+    private void handleAccountDeletion() {
+        ui.showDeleteAccountMenu();
+
+        balance();
+
+        int accountIndex = InputUtils.readInt(sc, "Digite o número da conta da lista a cima" +
+                " que deseja encerrar (0 para cancelar): ");
+        if (accountIndex == 0) return;
+
+        try {
+            List<Account> accounts = accountService.searchClientAccount(currentUser.getCpf());
+            Long idToDelete = accounts.get(accountIndex - 1).getId();
+
+            accountService.softDeleteAccount(idToDelete);
+            ui.showSucess("Conta encerrada com sucesso!");
+        } catch (Exception e) {
+
+            ui.showError("Erro ao encerrar conta: " + e.getMessage());
+        }
     }
 }

@@ -2,10 +2,7 @@ package BankSdNd.example.BsDnD.service;
 
 import BankSdNd.example.BsDnD.domain.Account;
 import BankSdNd.example.BsDnD.domain.BankUser;
-import BankSdNd.example.BsDnD.exception.business.AccountNotFoundException;
-import BankSdNd.example.BsDnD.exception.business.InsufficientBalanceException;
-import BankSdNd.example.BsDnD.exception.business.UnauthorizedOperationException;
-import BankSdNd.example.BsDnD.exception.business.UserNotFoundException;
+import BankSdNd.example.BsDnD.exception.business.*;
 import BankSdNd.example.BsDnD.repository.AccountRepository;
 import BankSdNd.example.BsDnD.repository.BankUserRepository;
 import BankSdNd.example.BsDnD.util.validation.AccountNumberGenerator;
@@ -16,10 +13,9 @@ import java.math.BigDecimal;
 import java.util.List;
 
 
-
 /**
  * Service class for managing bank account operations.
- *
+ * <p>
  * This service handles the business logic for creating new accounts,
  * retrieving account information, performing transfers, and validating account ownership.
  * All state-changing methods are transactional.
@@ -53,14 +49,14 @@ public class AccountService {
      * @throws UserNotFoundException if no user is found with the given CPF.
      */
     @Transactional
-    public Account accountCreate(String cpf){
+    public Account accountCreate(String cpf) {
         BankUser user = bankUserRepository.findByCpf(cpf)
                 .orElseThrow(() -> new UserNotFoundException("User with CPF " + cpf + " not found"));
 
         BigDecimal bonusvariable = user.getIncome().multiply(VARIABLE_BONUS);
         BigDecimal initialBalance = FIXED_BONUS.add(bonusvariable);
 
-        String  accountNumber = accountNumberGenerator.generateUniqueAccountNumber();
+        String accountNumber = accountNumberGenerator.generateUniqueAccountNumber();
         Account account = new Account(accountNumber, user, initialBalance);
 
         return accountRepository.save(account);
@@ -73,10 +69,10 @@ public class AccountService {
      * @return A {@code List<Account>} containing all found accounts for the user.
      * @throws UserNotFoundException if no accounts are found for the given CPF.
      */
-    public List<Account> searchClientAccount(String cpf){
+    public List<Account> searchClientAccount(String cpf) {
         List<Account> accounts = accountRepository.findAllByCpf(cpf);
 
-        if (accounts.isEmpty()){
+        if (accounts.isEmpty()) {
             throw new UserNotFoundException("No account found for the given CPF: " + cpf);
         }
         return accounts;
@@ -86,27 +82,27 @@ public class AccountService {
      * Performs a monetary transfer between two accounts. This operation is transactional.
      * If any validation fails (e.g., insufficient balance), the entire operation is rolled back.
      *
-     * @param originAccountNumber The account number of the source account.
+     * @param originAccountNumber      The account number of the source account.
      * @param destinationAccountNumber The account number of the destination account.
-     * @param value The amount to be transferred. Must be positive.
-     * @throws AccountNotFoundException if either the origin or destination account is not found.
+     * @param value                    The amount to be transferred. Must be positive.
+     * @throws AccountNotFoundException     if either the origin or destination account is not found.
      * @throws InsufficientBalanceException if the origin account does not have enough balance (thrown from the Account entity).
-     * @throws IllegalArgumentException if the transfer value is not positive or another argument is invalid.
+     * @throws IllegalArgumentException     if the transfer value is not positive or another argument is invalid.
      */
     @Transactional
-    public void transfer(String originAccountNumber, String destinationAccountNumber, BigDecimal value){
+    public void transfer(String originAccountNumber, String destinationAccountNumber, BigDecimal value) {
 
-        if (value == null || value.compareTo(BigDecimal.ZERO) <= 0){
+        if (value == null || value.compareTo(BigDecimal.ZERO) <= 0) {
             throw new InsufficientBalanceException("The tranfer amount must be greater than 0.");
         }
 
-         Account origin = accountRepository.findByAccountNumber(originAccountNumber)
-                 .orElseThrow(() -> new AccountNotFoundException("Account: " + originAccountNumber +" not found."));
+        Account origin = accountRepository.findByAccountNumberAndActiveTrue(originAccountNumber)
+                .orElseThrow(() -> new AccountNotFoundException("Account: " + originAccountNumber + " not found."));
 
-         Account destination = accountRepository.findByAccountNumber(destinationAccountNumber)
-                 .orElseThrow(() -> new AccountNotFoundException("Destination " + destinationAccountNumber + " not found."));
+        Account destination = accountRepository.findByAccountNumberAndActiveTrue(destinationAccountNumber)
+                .orElseThrow(() -> new AccountNotFoundException("Destination " + destinationAccountNumber + " not found."));
 
-         origin.transferTo(destination, value);
+        origin.transferTo(destination, value);
 
     }
 
@@ -115,18 +111,35 @@ public class AccountService {
      * This is a security method to ensure a user can only operate on their own accounts.
      * The method completes successfully if ownership is valid.
      *
-     * @param userId The ID of the user claiming ownership.
+     * @param userId        The ID of the user claiming ownership.
      * @param accountNumber The account number to be checked.
-     * @throws AccountNotFoundException if the account number does not exist.
+     * @throws AccountNotFoundException       if the account number does not exist.
      * @throws UnauthorizedOperationException if the account exists but does not belong to the specified user.
      */
-    public void validateAccountOwnership(Long userId, String accountNumber){
-        Account account = accountRepository.findByAccountNumber(accountNumber)
+    public void validateAccountOwnership(Long userId, String accountNumber) {
+        Account account = accountRepository.findByAccountNumberAndActiveTrue(accountNumber)
                 .orElseThrow(() -> new AccountNotFoundException("Account not found."));
 
-        if (!account.getTitular().getId().equals(userId)){
+        if (!account.getTitular().getId().equals(userId)) {
             throw new UnauthorizedOperationException("Origin account does not belong to the user.");
         }
     }
 
+    // !! fazer comentarios !!!!!!!
+
+    @Transactional
+    public void softDeleteAccount(Long accountId) {
+
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new AccountNotFoundException("Account not found with ID: " + accountId));
+
+        if (account.getBalance().compareTo(BigDecimal.ZERO) > 0) {
+
+            throw new BusinessException("Cannot delete account with a remaining balance." +
+                    "Please withdraw the funds first.");
+        }
+
+        account.setActive(false);
+        accountRepository.save(account);
+    }
 }
