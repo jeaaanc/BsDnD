@@ -3,11 +3,9 @@ package BankSdNd.example.BsDnD.menu;
 import BankSdNd.example.BsDnD.domain.Account;
 import BankSdNd.example.BsDnD.domain.BankUser;
 import BankSdNd.example.BsDnD.util.CurrencyUtils;
-import BankSdNd.example.BsDnD.util.InputUtils;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Scanner;
 
 public class ConsoleUI {
 
@@ -148,7 +146,7 @@ public class ConsoleUI {
     }
 
     public void accountCreatedSuccessfully(Account account) {
-        System.out.println("\nConta criada com sucesso: " + account.getTitular().getName() + "\n");
+        System.out.println("\nConta criada com sucesso: " + account.getHolder().getName() + "\n");
     }
 
     public void accountValidationShowError(String message) {

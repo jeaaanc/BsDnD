@@ -3,11 +3,14 @@ package BankSdNd.example.BsDnD.controller.api;
 import BankSdNd.example.BsDnD.domain.Account;
 import BankSdNd.example.BsDnD.dto.AccountRequest;
 import BankSdNd.example.BsDnD.dto.AccountResponse;
+import BankSdNd.example.BsDnD.dto.UserUpdateDtos;
 import BankSdNd.example.BsDnD.service.AccountService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/accounts")
@@ -24,14 +27,18 @@ public class AccountRestController {
 
         Account account = accountService.accountCreate(request.cpf());
 
-        AccountResponse response = new AccountResponse(
-                account.getId(),
-                account.getAccountNumber(),
-                account.getBalance(),
-                account.getTitular().getName() + " " + account.getTitular().getLastName()
-        );
+        return ResponseEntity.ok(mapToAccountResponse(account));
+    }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    @GetMapping
+    public ResponseEntity<List<AccountResponse>> listAllAccounts() {
+        List<Account> accounts = accountService.findAllActive();
+
+        List<AccountResponse> responses = accounts.stream()
+                .map(this::mapToAccountResponse)
+                .toList();
+
+        return ResponseEntity.ok(responses);
     }
 
     @DeleteMapping("/{id}")
@@ -40,5 +47,21 @@ public class AccountRestController {
         accountService.softDeleteAccount(id);
 
         return ResponseEntity.noContent().build();
+    }
+
+    private AccountResponse mapToAccountResponse(Account account) {
+        UserUpdateDtos.UserResponse userDto = new UserUpdateDtos.UserResponse(
+                account.getHolder().getId(),
+                account.getHolder().getName(),
+                account.getHolder().getLastName(),
+                account.getHolder().getPhoneNumber()
+        );
+
+        return new AccountResponse(
+                account.getId(),
+                account.getAccountNumber(),
+                account.getBalance(),
+                userDto
+        );
     }
 }

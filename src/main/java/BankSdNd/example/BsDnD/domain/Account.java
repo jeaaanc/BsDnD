@@ -28,7 +28,7 @@ public class Account {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private BankUser  titular;
+    private BankUser holder;
 
     @Column(name = "active", nullable = false)
     private boolean active = true;
@@ -40,7 +40,7 @@ public class Account {
 
     public Account(String numberAccount, BankUser titular, BigDecimal initialDeposit) {
         this.accountNumber = numberAccount;
-        this.titular = titular;
+        this.holder = titular;
         this.balance = BigDecimal.ZERO;
         if (initialDeposit != null && initialDeposit.compareTo(BigDecimal.ZERO) > 0){
             deposit(initialDeposit);
@@ -117,12 +117,12 @@ public class Account {
         this.accountNumber = accountNumber;
     }
 
-    public void setTitular(BankUser titular) {
-        this.titular = titular;
+    public void setHolder(BankUser holder) {
+        this.holder = holder;
     }
 
-    public BankUser getTitular() {
-        return titular;
+    public BankUser getHolder() {
+        return holder;
     }
 
     public boolean isActive() {
