@@ -120,7 +120,7 @@ public class AccountService {
         Account account = accountRepository.findByAccountNumberAndActiveTrue(accountNumber)
                 .orElseThrow(() -> new AccountNotFoundException("Account not found."));
 
-        if (!account.getTitular().getId().equals(userId)) {
+        if (!account.getHolder().getId().equals(userId)) {
             throw new UnauthorizedOperationException("Origin account does not belong to the user.");
         }
     }
@@ -141,5 +141,9 @@ public class AccountService {
 
         account.setActive(false);
         accountRepository.save(account);
+    }
+
+    public List<Account> findAllActive() {
+        return accountRepository.findAllByActiveTrue();
     }
 }

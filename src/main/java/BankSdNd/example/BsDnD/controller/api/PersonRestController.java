@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -38,6 +39,17 @@ public class PersonRestController {
         BankUser updatedUser = personService.changeName(id, request.name(), request.lastName());
 
         return ResponseEntity.ok(mapToResponse(updatedUser));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<UserUpdateDtos.UserResponse>> listAll() {
+        List<BankUser> users = personService.findAll();
+
+        List<UserUpdateDtos.UserResponse> response = users.stream()
+                .map(this::mapToResponse)
+                .toList();
+
+        return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{id}/phone")

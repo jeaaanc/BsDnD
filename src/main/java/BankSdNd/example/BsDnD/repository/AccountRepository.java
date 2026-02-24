@@ -16,8 +16,10 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
     Optional<Account> findByAccountNumberAndActiveTrue(String accountNumber);
 
-    @Query("SELECT a FROM Account a WHERE a.titular.cpf = :cpf AND a.active = true")
+    @Query("SELECT a FROM Account a WHERE a.holder.cpf = :cpf AND a.active = true")
     List<Account> findAllByCpf(@Param("cpf")String cpf);
+
+    List<Account> findAllByActiveTrue();
 
 }
 

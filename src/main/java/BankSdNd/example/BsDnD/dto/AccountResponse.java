@@ -9,5 +9,5 @@ public record AccountResponse(
         Long id,
         String accountNumber,
         BigDecimal balance,
-        String ownerName
+        UserUpdateDtos.UserResponse holder
 ){}
