@@ -33,7 +33,7 @@ public class BankUser {
     private String phoneNumber;
 
     @Column(name = "password", nullable = false)
-    private String passWord;
+    private String password;
 
     @Column(name = "income", precision = 15, scale = 2)
     private BigDecimal income;
@@ -44,8 +44,8 @@ public class BankUser {
      */
     protected BankUser(){}
 
-    public void setPassWord(String passWord) {
-        this.passWord = passWord;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public void setPhoneNumber(String phoneNumber) {
@@ -85,7 +85,7 @@ public class BankUser {
     }
 
     public String getPassword() {
-        return passWord;
+        return password;
     }
 
 
@@ -143,7 +143,7 @@ public class BankUser {
             person.cpf = this.cpf;
             person.phoneNumber = this.phoneNumber;
             person.income = this.income;
-            person.passWord = this.passWord;
+            person.password = this.passWord;
 
             return person;
         }

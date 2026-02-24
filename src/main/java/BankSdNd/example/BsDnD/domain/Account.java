@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "user_account")
 public class Account {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,6 +29,9 @@ public class Account {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private BankUser  titular;
+
+    @Column(name = "active", nullable = false)
+    private boolean active = true;
 
     /**
      * JPA-required constructor. Should not be used directly.
@@ -121,4 +125,11 @@ public class Account {
         return titular;
     }
 
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 }

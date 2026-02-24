@@ -7,6 +7,7 @@ import BankSdNd.example.BsDnD.exception.business.UserNotFoundException;
 import BankSdNd.example.BsDnD.repository.BankUserRepository;
 import BankSdNd.example.BsDnD.util.validation.CpfValidator;
 import BankSdNd.example.BsDnD.util.validation.PhoneValidator;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -23,9 +24,11 @@ import org.springframework.util.StringUtils;
 public class PersonService {
 
     private BankUserRepository personRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public PersonService(BankUserRepository personRepository) {
+    public PersonService(BankUserRepository personRepository, PasswordEncoder passwordEncoder) {
         this.personRepository = personRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
 
@@ -40,29 +43,31 @@ public class PersonService {
      */
     public BankUser savePerson(PersonDto dto) {
 
-        if (!CpfValidator.isValid(dto.getCpf())) {
+        if (!CpfValidator.isValid(dto.cpf())) {
             throw new IllegalArgumentException("Invalid CPF");
 
         }
-        if (personRepository.existsByCpf(dto.getCpf())) {
-            throw new DuplicateException("CPF", dto.getCpf());
+        if (personRepository.existsByCpf(dto.cpf())) {
+            throw new DuplicateException("CPF", dto.cpf());
         }
 
-        if (personRepository.existsByPhoneNumber(dto.getPhoneNumber())) {
-            throw new DuplicateException("Phone number", dto.getPhoneNumber());
+        if (personRepository.existsByPhoneNumber(dto.phoneNumber())){
+            throw new DuplicateException("Phone number", dto.phoneNumber());
         }
-        if (!PhoneValidator.isValidPhoneNumber(dto.getPhoneNumber())) {
+        if (!PhoneValidator.isValidPhoneNumber(dto.phoneNumber())) {
             throw new IllegalArgumentException("Invalid phone number. Use area code DDD + number");
 
         }
 
+        String encryptedPassword = passwordEncoder.encode(dto.password());
+
         BankUser person = new BankUser.Builder()
-                .name(dto.getName())
-                .lastName(dto.getLastName())
-                .cpf(dto.getCpf())
-                .phoneNumber(dto.getPhoneNumber())
-                .income(dto.getIncome())
-                .passWord(dto.getEncodedPassword())
+                .name(dto.name())
+                .lastName(dto.lastName())
+                .cpf(dto.cpf())
+                .phoneNumber(dto.phoneNumber())
+                .income(dto.income())
+                .passWord(encryptedPassword)
                 .build();
 
         return personRepository.save(person);

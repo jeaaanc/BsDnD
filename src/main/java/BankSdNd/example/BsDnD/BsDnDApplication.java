@@ -1,8 +1,8 @@
 package BankSdNd.example.BsDnD;
 
-import BankSdNd.example.BsDnD.controller.AuthenticationHandler;
-import BankSdNd.example.BsDnD.controller.ConsoleController;
-import BankSdNd.example.BsDnD.controller.UserSessionHandler;
+import BankSdNd.example.BsDnD.controller.cli.AuthenticationHandler;
+import BankSdNd.example.BsDnD.controller.cli.ConsoleController;
+import BankSdNd.example.BsDnD.controller.cli.UserSessionHandler;
 import BankSdNd.example.BsDnD.menu.ConsoleUI;
 import BankSdNd.example.BsDnD.service.AccountService;
 import BankSdNd.example.BsDnD.service.AuthService;
@@ -44,7 +44,7 @@ public class BsDnDApplication {
 				try (Scanner scanner = new Scanner(System.in)) {
                     ConsoleUI ui = new ConsoleUI();
 
-					AuthenticationHandler authenticationHandler = new AuthenticationHandler(authService, personService, passwordEncoder, accountService);
+					AuthenticationHandler authenticationHandler = new AuthenticationHandler(authService, personService, accountService);
 					UserSessionHandler userSessionHandler = new UserSessionHandler(accountService, personService, loanService, authService, scanner, ui);
 
 					ConsoleController controller = new ConsoleController(authenticationHandler, userSessionHandler, scanner, ui);

@@ -39,6 +39,7 @@ public class ConsoleUI {
                 3- Transferência.
                 4- Empréstimo.
                 5- Meu Perfil.
+                6- Deletar conta.           
                 9- Sair.
                 0- Limpar a tela.
                 """);
@@ -230,12 +231,12 @@ public class ConsoleUI {
 
     // Perfil v
 
-    public void displayPersonalData(BankUser loggedInUser){
-            System.out.println("\n===== Seus Dados Pessoais =====");
-            System.out.println("Nome: " + loggedInUser.getName());
-            System.out.println("Sobrenome: " + loggedInUser.getLastName());
-            System.out.println("CPF: " + loggedInUser.getCpf());
-            System.out.println("Telefone: " + loggedInUser.getPhoneNumber() + "\n");
+    public void displayPersonalData(BankUser loggedInUser) {
+        System.out.println("\n===== Seus Dados Pessoais =====");
+        System.out.println("Nome: " + loggedInUser.getName());
+        System.out.println("Sobrenome: " + loggedInUser.getLastName());
+        System.out.println("CPF: " + loggedInUser.getCpf());
+        System.out.println("Telefone: " + loggedInUser.getPhoneNumber() + "\n");
     }
 
     public void showProfileHeader(BankUser loggedInUser) {
@@ -251,15 +252,15 @@ public class ConsoleUI {
         System.out.println("\n===== Alteração de Telefone =====");
     }
 
-    public void showChangeNameScreen(){
+    public void showChangeNameScreen() {
         System.out.println("\n===== Alteração de Nome e Sobrenome =====");
     }
 
-    public void showNameChangedSuccessFully(){
+    public void showNameChangedSuccessFully() {
         System.out.println("\nNome alterado com sucesso!");
     }
 
-    public void showNameChangeError(String message){
+    public void showNameChangeError(String message) {
         System.out.println("Não foi possível alterar o nome: " + message);
     }
 
@@ -271,7 +272,7 @@ public class ConsoleUI {
         System.out.println("\nSennha alterada com secesso!");
     }
 
-    public void showProfilePasswordUpdateError(String message){
+    public void showProfilePasswordUpdateError(String message) {
         System.out.println("Não foi possivel alterar a senha: " + message);
     }
 
@@ -279,15 +280,19 @@ public class ConsoleUI {
         System.out.println("\nNúmero de telefone alterado com sucesso!");
     }
 
-    public void showProfilePhoneUpdateError(String message){
-        System.out.println("Não foi possivel alterar o telefone: "+ message);
+    public void showProfilePhoneUpdateError(String message) {
+        System.out.println("Não foi possivel alterar o telefone: " + message);
     }
 
-    public void showUserSessionExpired(){
+    public void showUserSessionExpired() {
         System.out.println("\nVocê foi desconectado. Por favor, faça o login novamente.");
     }
     // -----------------------------------------------
 
+    // Delete v
+    public void showDeleteAccountMenu() {
+        System.out.println("\n===== Encerrar Conta =====");
+    }
 
     public void showSucess(String message) {
         System.out.println("" + message);

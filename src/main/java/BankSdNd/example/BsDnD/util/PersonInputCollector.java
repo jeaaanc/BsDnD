@@ -18,13 +18,6 @@ import java.util.Scanner;
  */
 public class PersonInputCollector {
 
-    private final PasswordEncoder passwordEncoder;
-
-    public PersonInputCollector(PasswordEncoder passwordEncoder) {
-        this.passwordEncoder = passwordEncoder;
-    }
-
-
 
     /**
      * Orchestrates the step-by-step collection of a new user's data from the console.
@@ -52,8 +45,9 @@ public class PersonInputCollector {
                 return null;
             }
 
-            String encodedPassword = passwordEncoder.encode(new String(rawPassword));
-            return new PersonDto(name, lastName, cpf, phoneNumber, income, encodedPassword);
+            String rawPasswordString = new String(rawPassword);
+
+            return new PersonDto(name, lastName, cpf, phoneNumber, income, rawPasswordString);
 
         } finally {
 

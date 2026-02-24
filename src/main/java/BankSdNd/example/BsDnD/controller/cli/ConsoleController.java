@@ -1,4 +1,4 @@
-package BankSdNd.example.BsDnD.controller;
+package BankSdNd.example.BsDnD.controller.cli;
 
 import BankSdNd.example.BsDnD.domain.BankUser;
 import BankSdNd.example.BsDnD.menu.ConsoleUI;
@@ -55,7 +55,7 @@ public class ConsoleController {
             }
         }
     }
-    //Alberto	Cunha	14521128009 /444  / marcos	silva	12345678909
+    //Alberto	Cunha	14521128009 /444  / marcos	silva	12345678909 / 123
 
 
 }

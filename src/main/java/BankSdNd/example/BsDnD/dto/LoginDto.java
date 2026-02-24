@@ -1,31 +1,18 @@
 package BankSdNd.example.BsDnD.dto;
-
-import BankSdNd.example.BsDnD.util.SecurePasswordHolder;
-
+import jakarta.validation.constraints.NotBlank;
 
 /**
  * Data Transfer Object (DTO) for handling user login credentials.
- *
- * This class securely carries the user's CPF and raw password (as a char array)
- * from the controller layer to the authentication service. It implements
- * the {@link SecurePasswordHolder} to enforce secure password handling.
+ * This record acts as an immutable carrier for the user's CPF and password.
+ * It utilizes Jakarta Validation to ensure data integrity (non-blank fields)
+ *  before the request reaches the service layer.
+ * @param cpf  The user's CPF. Must not be blank.
+ * @param password password The user's password. Must not be blank.
  */
-public class LoginDto implements SecurePasswordHolder {
+public record LoginDto (
 
-    private final String cpf;
-    private final char[] rawPassword;
-
-
-    public LoginDto(String cpf, char[] password) {
-        this.cpf = cpf;
-        this.rawPassword = password;
-    }
-
-    public String getCpf() {
-        return cpf;
-    }
-
-    public char[] getRawPassword() {
-        return rawPassword;
-    }
-}
+    @NotBlank(message = "O CPF é obrigatório")
+    String cpf,
+    @NotBlank(message = "A senha é obrigatória")
+    String password
+) {}

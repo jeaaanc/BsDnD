@@ -41,7 +41,7 @@ public class AccountNumberGenerator {
             char checkDigit = calculateCheckDigit(base);
             accountNumber = base + checkDigit;
 
-        } while (accountRepository.existsByAccountNumber(accountNumber));
+        } while (accountRepository.existsByAccountNumberAndActiveTrue(accountNumber));
 
         return accountNumber;
     }
