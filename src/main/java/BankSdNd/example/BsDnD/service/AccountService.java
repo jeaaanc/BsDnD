@@ -6,6 +6,7 @@ import BankSdNd.example.BsDnD.exception.business.*;
 import BankSdNd.example.BsDnD.repository.AccountRepository;
 import BankSdNd.example.BsDnD.repository.BankUserRepository;
 import BankSdNd.example.BsDnD.util.validation.AccountNumberGenerator;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +26,7 @@ public class AccountService {
 
     private AccountRepository accountRepository;
     private BankUserRepository bankUserRepository;
+    private PasswordEncoder passwordEncoder;
     private final AccountNumberGenerator accountNumberGenerator;
 
     private static final BigDecimal FIXED_BONUS = new BigDecimal("300");
@@ -33,10 +35,12 @@ public class AccountService {
 
     public AccountService(AccountRepository accountRepository,
                           BankUserRepository bankUserRepository,
-                          AccountNumberGenerator accountNumberGenerator) {
+                          AccountNumberGenerator accountNumberGenerator,
+                          PasswordEncoder passwordEncoder) {
         this.accountRepository = accountRepository;
         this.bankUserRepository = bankUserRepository;
         this.accountNumberGenerator = accountNumberGenerator;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -90,7 +94,7 @@ public class AccountService {
      * @throws IllegalArgumentException     if the transfer value is not positive or another argument is invalid.
      */
     @Transactional
-    public void transfer(String originAccountNumber, String destinationAccountNumber, BigDecimal value) {
+    public void transfer(String originAccountNumber, String destinationAccountNumber, BigDecimal value, String password) {
 
         if (value == null || value.compareTo(BigDecimal.ZERO) <= 0) {
             throw new InsufficientBalanceException("The tranfer amount must be greater than 0.");
@@ -99,8 +103,13 @@ public class AccountService {
         Account origin = accountRepository.findByAccountNumberAndActiveTrue(originAccountNumber)
                 .orElseThrow(() -> new AccountNotFoundException("Account: " + originAccountNumber + " not found."));
 
+        if (!passwordEncoder.matches(password, origin.getHolder().getPassword())) {
+            throw new BusinessException("Invalid password. Transfer denied. ");
+        }
+
         Account destination = accountRepository.findByAccountNumberAndActiveTrue(destinationAccountNumber)
                 .orElseThrow(() -> new AccountNotFoundException("Destination " + destinationAccountNumber + " not found."));
+
 
         origin.transferTo(destination, value);
 
@@ -125,8 +134,14 @@ public class AccountService {
         }
     }
 
-    // !! fazer comentarios !!!!!!!
-
+    /**
+     * Executes a logical deletion (Soft Delete) of a bank account by setting its status to inactive.
+     * Includes a business rule validation to prevent closing accounts with a remaining balance.
+     * The operation is transactional to ensure database consistency.
+     * @param accountId The unique identifier of the account to be deactivated.
+     * @throws AccountNotFoundException if the account ID is not found in the database.
+     * @throws BusinessException if the account balance is greater than zero.
+     */
     @Transactional
     public void softDeleteAccount(Long accountId) {
 

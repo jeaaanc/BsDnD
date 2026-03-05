@@ -38,9 +38,9 @@ public class Account {
      */
     protected Account(){}
 
-    public Account(String numberAccount, BankUser titular, BigDecimal initialDeposit) {
+    public Account(String numberAccount, BankUser holder, BigDecimal initialDeposit) {
         this.accountNumber = numberAccount;
-        this.holder = titular;
+        this.holder = holder;
         this.balance = BigDecimal.ZERO;
         if (initialDeposit != null && initialDeposit.compareTo(BigDecimal.ZERO) > 0){
             deposit(initialDeposit);

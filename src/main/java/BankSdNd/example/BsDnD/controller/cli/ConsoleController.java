@@ -55,7 +55,8 @@ public class ConsoleController {
             }
         }
     }
-    //Alberto	Cunha	14521128009 /444  / marcos	silva	12345678909 / 123
+    // testes: Alberto	Cunha	cpf:14521128009 senha 123 , numero da conta: 457833858
+    // / marcos	silva	12345678909 / 123 == 150.00
 
 
 }
