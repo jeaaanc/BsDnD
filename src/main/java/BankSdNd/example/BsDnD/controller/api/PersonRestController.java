@@ -3,6 +3,7 @@ package BankSdNd.example.BsDnD.controller.api;
 import BankSdNd.example.BsDnD.domain.BankUser;
 import BankSdNd.example.BsDnD.dto.PersonDto;
 import BankSdNd.example.BsDnD.dto.UserUpdateDtos;
+import BankSdNd.example.BsDnD.service.AuthService;
 import BankSdNd.example.BsDnD.service.PersonService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +17,11 @@ import java.util.List;
 public class PersonRestController {
 
     private final PersonService personService;
+    private final AuthService authService;
 
-    public PersonRestController(PersonService personService) {
+    public PersonRestController(PersonService personService, AuthService authService) {
         this.personService = personService;
+        this.authService = authService;
     }
 
     @PostMapping
@@ -60,6 +63,16 @@ public class PersonRestController {
         BankUser updatedUser = personService.changePhoneNumber(id, request.phoneNumber());
 
         return ResponseEntity.ok(mapToResponse(updatedUser));
+    }
+
+    @PatchMapping("/{id}/password")
+    public ResponseEntity<Void> updatePassword(
+            @PathVariable Long id,
+            @RequestBody @Valid UserUpdateDtos.password request) {
+
+         authService.changePassword(id, request.oldPassword(), request.newPassword());
+
+        return ResponseEntity.noContent().build();
     }
 
     private UserUpdateDtos.UserResponse mapToResponse(BankUser user) {

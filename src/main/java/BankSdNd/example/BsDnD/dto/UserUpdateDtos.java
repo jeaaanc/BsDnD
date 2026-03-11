@@ -13,6 +13,11 @@ public class UserUpdateDtos {
             @NotBlank(message = "O telefone é obrigatório") String phoneNumber
     ) {}
 
+    public record password(
+            @NotBlank(message = "A senha antiga é obrigatória") String oldPassword,
+            @NotBlank(message = "A senha nova é obrigatória") String newPassword
+//            @NotBlank(message = "Confirmação da senha é obrigatória") String confirmedPassword
+    ) {}
     public record UserResponse (
             Long id,
             String name,
