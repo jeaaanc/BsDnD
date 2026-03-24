@@ -2,8 +2,10 @@ package BankSdNd.example.BsDnD.controller.api;
 
 import BankSdNd.example.BsDnD.domain.BankUser;
 import BankSdNd.example.BsDnD.dto.LoginDto;
+import BankSdNd.example.BsDnD.dto.LoginResponseDto;
 import BankSdNd.example.BsDnD.dto.UserUpdateDtos;
 import BankSdNd.example.BsDnD.service.AuthService;
+import BankSdNd.example.BsDnD.service.TokenService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,22 +18,19 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthRestController {
 
     private final AuthService authService;
+    private final TokenService tokenService;
 
-    public AuthRestController(AuthService authService) {
+    public AuthRestController(AuthService authService, TokenService tokenService) {
         this.authService = authService;
+        this.tokenService = tokenService;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserUpdateDtos.UserResponse> login(@RequestBody @Valid LoginDto loginDto){
-        BankUser user = authService.login(loginDto);
+    public ResponseEntity<LoginResponseDto> login(@RequestBody @Valid LoginDto data){
+        BankUser user = authService.login(data);
 
-        UserUpdateDtos.UserResponse response = new UserUpdateDtos.UserResponse(
-                user.getId(),
-                user.getName(),
-                user.getLastName(),
-                user.getPhoneNumber()
-        );
+        String token = tokenService.generateToken(user);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new LoginResponseDto(token));
     }
 }

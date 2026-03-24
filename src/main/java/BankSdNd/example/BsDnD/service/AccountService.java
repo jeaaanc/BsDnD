@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import org.springframework.security.access.AccessDeniedException;
 import java.util.List;
 
 
@@ -94,7 +95,7 @@ public class AccountService {
      * @throws IllegalArgumentException     if the transfer value is not positive or another argument is invalid.
      */
     @Transactional
-    public void transfer(String originAccountNumber, String destinationAccountNumber, BigDecimal value, String password) {
+    public void transfer(String originAccountNumber, String destinationAccountNumber, BigDecimal value, String password, BankUser loggedUser) {
 
         if (value == null || value.compareTo(BigDecimal.ZERO) <= 0) {
             throw new InsufficientBalanceException("The tranfer amount must be greater than 0.");
@@ -102,6 +103,10 @@ public class AccountService {
 
         Account origin = accountRepository.findByAccountNumberAndActiveTrue(originAccountNumber)
                 .orElseThrow(() -> new AccountNotFoundException("Account: " + originAccountNumber + " not found."));
+        
+        if (!origin.getHolder().getId().equals(loggedUser.getId())) {
+            throw new AccessDeniedException("Você não tem permisão para usar esta conta.");
+        }
 
         if (!passwordEncoder.matches(password, origin.getHolder().getPassword())) {
             throw new BusinessException("Invalid password. Transfer denied. ");
@@ -138,9 +143,10 @@ public class AccountService {
      * Executes a logical deletion (Soft Delete) of a bank account by setting its status to inactive.
      * Includes a business rule validation to prevent closing accounts with a remaining balance.
      * The operation is transactional to ensure database consistency.
+     *
      * @param accountId The unique identifier of the account to be deactivated.
      * @throws AccountNotFoundException if the account ID is not found in the database.
-     * @throws BusinessException if the account balance is greater than zero.
+     * @throws BusinessException        if the account balance is greater than zero.
      */
     @Transactional
     public void softDeleteAccount(Long accountId) {

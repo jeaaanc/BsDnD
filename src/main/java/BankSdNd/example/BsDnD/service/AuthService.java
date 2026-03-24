@@ -5,6 +5,7 @@ import BankSdNd.example.BsDnD.dto.LoginDto;
 import BankSdNd.example.BsDnD.exception.business.InvalidPasswordException;
 import BankSdNd.example.BsDnD.exception.business.UserNotFoundException;
 import BankSdNd.example.BsDnD.repository.BankUserRepository;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -96,8 +97,11 @@ public class AuthService {
      * @throws IllegalArgumentException if any of the passwords are null/empty, or if the new password is the same as the old one.
      */
     @Transactional
-    public void changePassword(Long userId, String oldPassword, String newPassword) {
+    public void updatePassword(Long userId, String oldPassword, String newPassword, BankUser loggedUser) {
 
+        if (!loggedUser.getId().equals(userId)){
+            throw new AccessDeniedException("Você não tem permissão para alterar este usuário.");
+        }
         if (oldPassword == null || oldPassword.isBlank() || newPassword == null || newPassword.isBlank()) {
             throw new IllegalArgumentException("Passwords cannot be empty.");
         }

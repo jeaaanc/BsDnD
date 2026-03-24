@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import org.springframework.security.access.AccessDeniedException;
 import java.util.List;
 
 
@@ -86,8 +87,11 @@ public class PersonService {
      * @throws DuplicateException       if the new phone number is already in use by another user.
      */
     @Transactional
-    public BankUser changePhoneNumber(Long userId, String newPhoneNumber) {
+    public BankUser updatePhoneNumber(Long userId, String newPhoneNumber, BankUser loggedUser) {
         // v exception
+        if (!loggedUser.getId().equals(userId)){
+            throw new AccessDeniedException("Você não tem permissão para alterar este usuário.");
+        }
         if (!PhoneValidator.isValidPhoneNumber(newPhoneNumber)) {
             throw new IllegalArgumentException("New phone number is invalid.");
         }
@@ -115,7 +119,11 @@ public class PersonService {
      * @throws IllegalArgumentException if the new first name or last name are null or empty.
      */
     @Transactional
-    public BankUser changeName(Long userId, String newFirstName, String newLastName) {
+    public BankUser updateName(Long userId, String newFirstName, String newLastName, BankUser loggedUser) {
+
+        if (!loggedUser.getId().equals(userId)){
+            throw new AccessDeniedException("Você não tem permissão para alterar este usuário.");
+        }
 
         if (!StringUtils.hasText(newFirstName) || !StringUtils.hasText(newLastName)) {
             throw new IllegalArgumentException("First name and last name cannot be empty.");

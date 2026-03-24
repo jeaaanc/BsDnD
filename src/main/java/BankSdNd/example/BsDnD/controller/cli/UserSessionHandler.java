@@ -3,7 +3,6 @@ package BankSdNd.example.BsDnD.controller.cli;
 import BankSdNd.example.BsDnD.domain.Account;
 import BankSdNd.example.BsDnD.domain.BankUser;
 import BankSdNd.example.BsDnD.exception.business.BusinessException;
-import BankSdNd.example.BsDnD.exception.business.InvalidPasswordException;
 import BankSdNd.example.BsDnD.menu.ConsoleUI;
 import BankSdNd.example.BsDnD.service.AccountService;
 import BankSdNd.example.BsDnD.service.AuthService;
@@ -182,7 +181,6 @@ public class UserSessionHandler {
         ui.showTransferMenu();
 
         String password = captureTransactionPassword();
-
         if (password == null) {
             ui.showTranferErroValidationPassword();
             return;
@@ -194,7 +192,7 @@ public class UserSessionHandler {
 
         try {
 
-            accountService.transfer(accountOrigem, accountDestination, valor, password);
+            accountService.transfer(accountOrigem, accountDestination, valor, password, this.currentUser);
             ui.showTranferSuccessfully();
 
         } catch (BusinessException | IllegalArgumentException e) {
@@ -283,7 +281,7 @@ public class UserSessionHandler {
 
             String oldPasswordString = new String(rawOldPassword);
 
-            authService.changePassword(this.currentUser.getId(), oldPasswordString, newPassword);
+            authService.updatePassword(this.currentUser.getId(), oldPasswordString, newPassword, this.currentUser);
             ui.showProfilePasswordChangeSuccessfully();
             return true;
 
@@ -309,7 +307,7 @@ public class UserSessionHandler {
         try {
             String newPhoneNumber = InputUtils.readString(sc, "Digite o novo número de telefone: ");
 
-            BankUser updatedUser = personService.changePhoneNumber(this.currentUser.getId(), newPhoneNumber);
+            BankUser updatedUser = personService.updatePhoneNumber(this.currentUser.getId(), newPhoneNumber, this.currentUser);
             ui.showProfilePhoneChangedSuccessfully();
             return updatedUser;
 
@@ -387,7 +385,7 @@ public class UserSessionHandler {
             String newFirstName = InputUtils.readString(sc, "Digite o novo primeiro Nome: ");
             String newLastName = InputUtils.readString(sc, "Digite o novo sobrenome: ");
 
-            BankUser updatedUser = personService.changeName(this.currentUser.getId(), newFirstName, newLastName);
+            BankUser updatedUser = personService.updateName(this.currentUser.getId(), newFirstName, newLastName, this.currentUser);
 
             ui.showNameChangedSuccessFully();
 
