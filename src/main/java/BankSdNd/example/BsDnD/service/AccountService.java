@@ -90,12 +90,15 @@ public class AccountService {
      * @param originAccountNumber      The account number of the source account.
      * @param destinationAccountNumber The account number of the destination account.
      * @param value                    The amount to be transferred. Must be positive.
+     * @param transactionPassword      The 4-digit transactional password of the account holder.
+     * @param loggedUser               The currently authenticated user making the request.
      * @throws AccountNotFoundException     if either the origin or destination account is not found.
      * @throws InsufficientBalanceException if the origin account does not have enough balance (thrown from the Account entity).
-     * @throws IllegalArgumentException     if the transfer value is not positive or another argument is invalid.
+     * @throws AccessDeniedException        if the logged user is not the owner of the origin account.
+     * @throws BusinessException            if the tra transaction password is invalid.
      */
     @Transactional
-    public void transfer(String originAccountNumber, String destinationAccountNumber, BigDecimal value, String password, BankUser loggedUser) {
+    public void transfer(String originAccountNumber, String destinationAccountNumber, BigDecimal value, String transactionPassword, BankUser loggedUser) {
 
         if (value == null || value.compareTo(BigDecimal.ZERO) <= 0) {
             throw new InsufficientBalanceException("The tranfer amount must be greater than 0.");
@@ -108,8 +111,8 @@ public class AccountService {
             throw new AccessDeniedException("Você não tem permisão para usar esta conta.");
         }
 
-        if (!passwordEncoder.matches(password, origin.getHolder().getPassword())) {
-            throw new BusinessException("Invalid password. Transfer denied. ");
+        if (!passwordEncoder.matches(transactionPassword, origin.getHolder().getTransactionPassword())) {
+            throw new BusinessException("Invalid transaction password. Transfer denied. ");
         }
 
         Account destination = accountRepository.findByAccountNumberAndActiveTrue(destinationAccountNumber)

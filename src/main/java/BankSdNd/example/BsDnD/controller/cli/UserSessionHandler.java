@@ -223,7 +223,7 @@ public class UserSessionHandler {
         try {
             ui.showConfimedPassword();
 
-            rawPassword = PasswordUtils.catchPassword("Senha: ");
+            rawPassword = PasswordUtils.catchPassword("Senha de transação: ");
 
             if (rawPassword == null || rawPassword.length == 0) {
                 ui.showPasswordNull();

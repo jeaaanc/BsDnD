@@ -62,6 +62,7 @@ public class PersonService {
         }
 
         String encryptedPassword = passwordEncoder.encode(dto.password());
+        String encryptedTransactionPassword = passwordEncoder.encode(dto.transactionPassword());
 
         BankUser person = new BankUser.Builder()
                 .name(dto.name())
@@ -70,6 +71,7 @@ public class PersonService {
                 .phoneNumber(dto.phoneNumber())
                 .income(dto.income())
                 .passWord(encryptedPassword)
+                .transctionPassword(encryptedTransactionPassword)
                 .build();
 
         return personRepository.save(person);
