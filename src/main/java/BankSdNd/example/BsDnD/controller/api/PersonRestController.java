@@ -3,9 +3,11 @@ package BankSdNd.example.BsDnD.controller.api;
 import BankSdNd.example.BsDnD.domain.BankUser;
 import BankSdNd.example.BsDnD.dto.PersonDto;
 import BankSdNd.example.BsDnD.dto.UserUpdateDtos;
+import BankSdNd.example.BsDnD.service.AuthService;
 import BankSdNd.example.BsDnD.service.PersonService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -16,9 +18,11 @@ import java.util.List;
 public class PersonRestController {
 
     private final PersonService personService;
+    private final AuthService authService;
 
-    public PersonRestController(PersonService personService) {
+    public PersonRestController(PersonService personService, AuthService authService) {
         this.personService = personService;
+        this.authService = authService;
     }
 
     @PostMapping
@@ -34,9 +38,11 @@ public class PersonRestController {
     @PatchMapping("/{id}/name")
     public ResponseEntity<UserUpdateDtos.UserResponse> updateName(
             @PathVariable Long id,
-            @RequestBody @Valid UserUpdateDtos.Name request) {
+            @RequestBody @Valid UserUpdateDtos.Name request,
+            @AuthenticationPrincipal BankUser loggedUser
+    ) {
 
-        BankUser updatedUser = personService.changeName(id, request.name(), request.lastName());
+        BankUser updatedUser = personService.updateName(id, request.name(), request.lastName(), loggedUser);
 
         return ResponseEntity.ok(mapToResponse(updatedUser));
     }
@@ -55,11 +61,25 @@ public class PersonRestController {
     @PatchMapping("/{id}/phone")
     public ResponseEntity<UserUpdateDtos.UserResponse> updatePhone(
             @PathVariable Long id,
-            @RequestBody @Valid UserUpdateDtos.Phone request) {
+            @RequestBody @Valid UserUpdateDtos.Phone request,
+            @AuthenticationPrincipal BankUser loggedUser
+    ) {
 
-        BankUser updatedUser = personService.changePhoneNumber(id, request.phoneNumber());
+        BankUser updatedUser = personService.updatePhoneNumber(id, request.phoneNumber(), loggedUser);
 
         return ResponseEntity.ok(mapToResponse(updatedUser));
+    }
+
+    @PatchMapping("/{id}/password")
+    public ResponseEntity<Void> updatePassword(
+            @PathVariable Long id,
+            @RequestBody @Valid UserUpdateDtos.password request,
+            @AuthenticationPrincipal BankUser loggedUser
+    ) {
+
+         authService.updatePassword(id, request.oldPassword(), request.newPassword(), loggedUser);
+
+        return ResponseEntity.noContent().build();
     }
 
     private UserUpdateDtos.UserResponse mapToResponse(BankUser user) {

@@ -5,10 +5,9 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 
 
-
 /**
  * Represents a user (customer) of the bank.
- *
+ * <p>
  * This is a JPA entity that maps to the {@code bank_user} table in the database.
  * It contains the user's personal identification data, income information, and security credentials.
  * Objects of this class are typically created using the nested {@link Builder}.
@@ -18,7 +17,7 @@ import java.math.BigDecimal;
 public class BankUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private  Long id;
+    private Long id;
 
     @Column(name = "name")
     private String name;
@@ -34,6 +33,8 @@ public class BankUser {
 
     @Column(name = "password", nullable = false)
     private String password;
+    @Column(name = "transaction_password")
+    private String transactionPassword;
 
     @Column(name = "income", precision = 15, scale = 2)
     private BigDecimal income;
@@ -42,7 +43,8 @@ public class BankUser {
      * JPA-required constructor. Should not be used directly.
      * Use the {@link Builder} to create new instances.
      */
-    protected BankUser(){}
+    protected BankUser() {
+    }
 
     public void setPassword(String password) {
         this.password = password;
@@ -88,11 +90,13 @@ public class BankUser {
         return password;
     }
 
+    public String getTransactionPassword() {
+        return transactionPassword;
+    }
 
     public Long getId() {
         return id;
     }
-
 
 
     /**
@@ -106,37 +110,49 @@ public class BankUser {
         private String phoneNumber;
         private BigDecimal income;
         private String passWord;
+        private String transctionPassword;
 
-        public Builder name(String name){
+        public Builder name(String name) {
             this.name = name;
             return this;
         }
-        public Builder lastName(String lastName){
+
+        public Builder lastName(String lastName) {
             this.lastName = lastName;
             return this;
         }
-        public Builder cpf(String cpf){
+
+        public Builder cpf(String cpf) {
             this.cpf = cpf;
             return this;
         }
-        public Builder phoneNumber(String phoneNumber){
+
+        public Builder phoneNumber(String phoneNumber) {
             this.phoneNumber = phoneNumber;
             return this;
         }
-        public Builder income(BigDecimal income){
+
+        public Builder income(BigDecimal income) {
             this.income = income;
             return this;
         }
-        public Builder passWord(String passWord){
+
+        public Builder passWord(String passWord) {
             this.passWord = passWord;
+            return this;
+        }
+
+        public Builder transctionPassword(String transctionPassword) {
+            this.transctionPassword = transctionPassword;
             return this;
         }
 
         /**
          * Builds and returns a new {@link BankUser} instance with the configured data.
+         *
          * @return a new {@code BankUser} object.
          */
-        public BankUser build(){
+        public BankUser build() {
             BankUser person = new BankUser();
             person.name = this.name;
             person.lastName = this.lastName;
@@ -144,6 +160,7 @@ public class BankUser {
             person.phoneNumber = this.phoneNumber;
             person.income = this.income;
             person.password = this.passWord;
+            person.transactionPassword = this.transctionPassword;
 
             return person;
         }

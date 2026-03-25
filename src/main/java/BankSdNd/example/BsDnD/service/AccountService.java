@@ -6,10 +6,12 @@ import BankSdNd.example.BsDnD.exception.business.*;
 import BankSdNd.example.BsDnD.repository.AccountRepository;
 import BankSdNd.example.BsDnD.repository.BankUserRepository;
 import BankSdNd.example.BsDnD.util.validation.AccountNumberGenerator;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import org.springframework.security.access.AccessDeniedException;
 import java.util.List;
 
 
@@ -25,6 +27,7 @@ public class AccountService {
 
     private AccountRepository accountRepository;
     private BankUserRepository bankUserRepository;
+    private PasswordEncoder passwordEncoder;
     private final AccountNumberGenerator accountNumberGenerator;
 
     private static final BigDecimal FIXED_BONUS = new BigDecimal("300");
@@ -33,10 +36,12 @@ public class AccountService {
 
     public AccountService(AccountRepository accountRepository,
                           BankUserRepository bankUserRepository,
-                          AccountNumberGenerator accountNumberGenerator) {
+                          AccountNumberGenerator accountNumberGenerator,
+                          PasswordEncoder passwordEncoder) {
         this.accountRepository = accountRepository;
         this.bankUserRepository = bankUserRepository;
         this.accountNumberGenerator = accountNumberGenerator;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -85,12 +90,15 @@ public class AccountService {
      * @param originAccountNumber      The account number of the source account.
      * @param destinationAccountNumber The account number of the destination account.
      * @param value                    The amount to be transferred. Must be positive.
+     * @param transactionPassword      The 4-digit transactional password of the account holder.
+     * @param loggedUser               The currently authenticated user making the request.
      * @throws AccountNotFoundException     if either the origin or destination account is not found.
      * @throws InsufficientBalanceException if the origin account does not have enough balance (thrown from the Account entity).
-     * @throws IllegalArgumentException     if the transfer value is not positive or another argument is invalid.
+     * @throws AccessDeniedException        if the logged user is not the owner of the origin account.
+     * @throws BusinessException            if the tra transaction password is invalid.
      */
     @Transactional
-    public void transfer(String originAccountNumber, String destinationAccountNumber, BigDecimal value) {
+    public void transfer(String originAccountNumber, String destinationAccountNumber, BigDecimal value, String transactionPassword, BankUser loggedUser) {
 
         if (value == null || value.compareTo(BigDecimal.ZERO) <= 0) {
             throw new InsufficientBalanceException("The tranfer amount must be greater than 0.");
@@ -98,9 +106,18 @@ public class AccountService {
 
         Account origin = accountRepository.findByAccountNumberAndActiveTrue(originAccountNumber)
                 .orElseThrow(() -> new AccountNotFoundException("Account: " + originAccountNumber + " not found."));
+        
+        if (!origin.getHolder().getId().equals(loggedUser.getId())) {
+            throw new AccessDeniedException("Você não tem permisão para usar esta conta.");
+        }
+
+        if (!passwordEncoder.matches(transactionPassword, origin.getHolder().getTransactionPassword())) {
+            throw new BusinessException("Invalid transaction password. Transfer denied. ");
+        }
 
         Account destination = accountRepository.findByAccountNumberAndActiveTrue(destinationAccountNumber)
                 .orElseThrow(() -> new AccountNotFoundException("Destination " + destinationAccountNumber + " not found."));
+
 
         origin.transferTo(destination, value);
 
@@ -125,8 +142,15 @@ public class AccountService {
         }
     }
 
-    // !! fazer comentarios !!!!!!!
-
+    /**
+     * Executes a logical deletion (Soft Delete) of a bank account by setting its status to inactive.
+     * Includes a business rule validation to prevent closing accounts with a remaining balance.
+     * The operation is transactional to ensure database consistency.
+     *
+     * @param accountId The unique identifier of the account to be deactivated.
+     * @throws AccountNotFoundException if the account ID is not found in the database.
+     * @throws BusinessException        if the account balance is greater than zero.
+     */
     @Transactional
     public void softDeleteAccount(Long accountId) {
 

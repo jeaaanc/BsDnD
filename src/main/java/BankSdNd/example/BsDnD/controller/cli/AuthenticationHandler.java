@@ -111,7 +111,7 @@ public class AuthenticationHandler {
     public void registerUser(Scanner scanner, ConsoleUI ui) {
             ui.showCreateUser();
 
-            PersonInputCollector collector = new PersonInputCollector();
+            PersonInputCollector collector = new PersonInputCollector(ui);
             PersonDto dto = collector.collectUserInput(scanner);
 
             if (dto == null) {

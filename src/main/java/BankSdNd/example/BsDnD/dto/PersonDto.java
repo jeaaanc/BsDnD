@@ -1,9 +1,6 @@
 package BankSdNd.example.BsDnD.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 
@@ -16,9 +13,10 @@ import java.math.BigDecimal;
  * @param name  The user's first name.
  * @param lastName  The user's last name.
  * @param cpf  The user's CPF (validated by business logic later).
- * @param income  The user's phone number.
- * @param phoneNumber  The user's monthly income. Must be positive.
+ * @param  phoneNumber The user's phone number.
+ * @param  income The user's monthly income. Must be positive.
  * @param password  The user's raw password. Must meet minimum size requirements.
+ * @param transactionPassword the ...!!!!
  */
 public record PersonDto(
 
@@ -38,7 +36,11 @@ public record PersonDto(
     @Positive(message = "A renda deve ser um valor positivo")
     BigDecimal income,
 
+    @NotBlank(message = "A senha de login é obrigatório")
+    @Pattern(regexp = "^\\d{6}$", message = "A senha de login deve ter no mínimo 6 números.")
+    String password,
+
     @NotBlank(message = "A senha é obrigatório")
-    @Size(min = 6, message = "A senha deve ter no mínimo 6 caracteres")
-    String password
+    @Pattern(regexp = "^\\d{4}$", message = "A senha de transação deve ter no mínimo 4 números.")
+    String transactionPassword
 ) {}

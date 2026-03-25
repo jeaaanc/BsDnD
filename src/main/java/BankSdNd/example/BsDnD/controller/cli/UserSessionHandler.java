@@ -2,8 +2,7 @@ package BankSdNd.example.BsDnD.controller.cli;
 
 import BankSdNd.example.BsDnD.domain.Account;
 import BankSdNd.example.BsDnD.domain.BankUser;
-import BankSdNd.example.BsDnD.exception.business.InvalidPasswordException;
-import BankSdNd.example.BsDnD.exception.business.UserNotFoundException;
+import BankSdNd.example.BsDnD.exception.business.BusinessException;
 import BankSdNd.example.BsDnD.menu.ConsoleUI;
 import BankSdNd.example.BsDnD.service.AccountService;
 import BankSdNd.example.BsDnD.service.AuthService;
@@ -124,8 +123,8 @@ public class UserSessionHandler {
 
         String cpf = InputUtils.readString(sc, "Seu CPF: ");
 
-        boolean isPasswordConfirmed = askConfirmTransactionPassword();
-        if (!isPasswordConfirmed) {
+        String isPasswordConfirmed = captureTransactionPassword();
+        if (isPasswordConfirmed == null) {
             ui.accountShowPasswordValidation();
             return;
         }
@@ -160,8 +159,8 @@ public class UserSessionHandler {
             return;
         }
 
-        boolean isPasswordConfirmed = askConfirmTransactionPassword();
-        if (!isPasswordConfirmed) {
+        String isPasswordConfirmed = captureTransactionPassword();
+        if (isPasswordConfirmed == null) {
             ui.showPasswordValidationError();
             return;
         }
@@ -181,25 +180,22 @@ public class UserSessionHandler {
     public void showTransferForm() {
         ui.showTransferMenu();
 
-        boolean isPasswordIsConfirmed = askConfirmTransactionPassword();
-
-        if (!isPasswordIsConfirmed) {
+        String password = captureTransactionPassword();
+        if (password == null) {
             ui.showTranferErroValidationPassword();
             return;
         }
 
         String accountOrigem = readAccountOrigem();
-
         String accountDestination = readContaDestino();
-
         BigDecimal valor = InputUtils.readBigDecimal(sc, "Digite o valor da transferência: ");
 
         try {
 
-            accountService.transfer(accountOrigem, accountDestination, valor);
+            accountService.transfer(accountOrigem, accountDestination, valor, password, this.currentUser);
             ui.showTranferSuccessfully();
 
-        } catch (InvalidPasswordException | IllegalArgumentException e) {
+        } catch (BusinessException | IllegalArgumentException e) {
             ui.showErroTransfer(e.getMessage());
         }
     }
@@ -214,33 +210,28 @@ public class UserSessionHandler {
     }
 
     /**
-     * Prompts the user to re-enter their password to confirm a sensitive operation.
-     * Securely handles the password and calls the authentication service for validation.
+     * Prompts the user to enter their password to authorize a sensitive operation.
+     * Securely captures the input and returns it as a String, ensuring that
+     * sensitive memory (char arrays) is cleared after processing.
      *
-     * @return {@code true} if the password is correct, {@code false} otherwise.
+     * @return The captured password as a {@code String}, or {@code null} if the operation was canceled.
      */
-    private boolean askConfirmTransactionPassword() {
+    private String captureTransactionPassword() {
 
         char[] rawPassword = null;
 
         try {
             ui.showConfimedPassword();
 
-            rawPassword = PasswordUtils.catchPassword("Senha: ");
+            rawPassword = PasswordUtils.catchPassword("Senha de transação: ");
 
             if (rawPassword == null || rawPassword.length == 0) {
                 ui.showPasswordNull();
-                return false;
+                return null;
             }
 
-            String passwordString = new String(rawPassword);
+            return new String(rawPassword);
 
-            authService.validatePassword(this.currentUser.getId(), passwordString);
-            return true;
-
-        } catch (InvalidPasswordException | UserNotFoundException e) {
-            ui.showValidationError(e.getMessage());
-            return false;
         } finally {
 
             if (rawPassword != null) {
@@ -261,7 +252,13 @@ public class UserSessionHandler {
         return InputUtils.readString(sc, "Digite o número da conta de destino: ");
     }
 
-
+    /**
+     * Orchestrates the secure interactive flow for changing the current user's password.
+     * Collects the current password and the new confirmed password via secure CLI prompts.
+     * Delegates the validation of the old password and the persistence of the new encoded password to the AuthService.
+     * Ensures sensitive memory (char arrays) is cleared after processing.
+     * @return {@code true} if the password was successfully changed, signaling that the user should be logged out; {@code false} otherwise.
+     */
     private boolean handleChangePassword() {
         ui.showChangePasswordScreen();
 
@@ -284,7 +281,7 @@ public class UserSessionHandler {
 
             String oldPasswordString = new String(rawOldPassword);
 
-            authService.changePassword(this.currentUser.getId(), oldPasswordString, newPassword);
+            authService.updatePassword(this.currentUser.getId(), oldPasswordString, newPassword, this.currentUser);
             ui.showProfilePasswordChangeSuccessfully();
             return true;
 
@@ -298,13 +295,19 @@ public class UserSessionHandler {
         }
     }
 
+    /**
+     * Orchestrates the interactive flow for updating the current user's phone number.
+     * Displays the update screen and collects the new phone number via CLI prompts.
+     * Delegates the validation and persistence of the new number to the service layer.
+     * @return the updated user entity upon success, or the current user instance if an error occurs.
+     */
     private BankUser handleChangePhoneNumber() {
         ui.showChangePhonenumberScreen();
 
         try {
             String newPhoneNumber = InputUtils.readString(sc, "Digite o novo número de telefone: ");
 
-            BankUser updatedUser = personService.changePhoneNumber(this.currentUser.getId(), newPhoneNumber);
+            BankUser updatedUser = personService.updatePhoneNumber(this.currentUser.getId(), newPhoneNumber, this.currentUser);
             ui.showProfilePhoneChangedSuccessfully();
             return updatedUser;
 
@@ -315,7 +318,15 @@ public class UserSessionHandler {
         }
     }
 
+    /**
+     *
+     *  Orchestrates the secure collection and confirmation of a new password.
+     *  It prompts the user twice to ensure both entries match, preventing typos during credential updates.
+     *  Temporary character arrays are used for input and are explicitly cleared from memory after processing to protect sensitive data.
+     *  @return The confirmed new password as a {@code String}, or {@code null} if the process is canceled or aborted.
+     */
     private String askForNewConfirmedPassword() {
+
         char[] newPassword = null;
         char[] newPasswordConfirmation = null;
 
@@ -360,6 +371,13 @@ public class UserSessionHandler {
 
     }
 
+    /**
+     * Manages the interactive flow for updating the current user's first and last name.
+     * Collects the new name and last name via CLI prompts.
+     * Delegates the update and persistence to the service layer.
+     *
+     * @return the updated user entity on success, or the current instance if the operation fails.
+     */
     private BankUser handleChangeName() {
         ui.showChangeNameScreen();
 
@@ -367,7 +385,7 @@ public class UserSessionHandler {
             String newFirstName = InputUtils.readString(sc, "Digite o novo primeiro Nome: ");
             String newLastName = InputUtils.readString(sc, "Digite o novo sobrenome: ");
 
-            BankUser updatedUser = personService.changeName(this.currentUser.getId(), newFirstName, newLastName);
+            BankUser updatedUser = personService.updateName(this.currentUser.getId(), newFirstName, newLastName, this.currentUser);
 
             ui.showNameChangedSuccessFully();
 
@@ -389,6 +407,13 @@ public class UserSessionHandler {
         InputUtils.readString(sc, "Pressione Enter para voltar ao menu");
     }
 
+    /**
+     * Orchestrates the interactive flow for closing an existing bank account.
+     * * It displays the user's active accounts, collects the selection by index,
+     * and delegates the "Soft Delete" operation to the service layer.
+     * Any business rule violation (like a remaining balance) or technical error
+     * is caught and displayed to the user via the UI.
+     */
     private void handleAccountDeletion() {
         ui.showDeleteAccountMenu();
 
