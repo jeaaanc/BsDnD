@@ -54,7 +54,7 @@ public class PersonInputCollector {
             return null;
         }
 
-        BigDecimal income = InputUtils.readBigDecimal(scanner, "Renda: ");
+        BigDecimal income = InputUtils.readBigDecimal(scanner, "Renda: (Ex: 1500.50): ");
 
         char[] rawLoginPassword = null;
         char[] rawTransactionPassword = null;
@@ -164,11 +164,13 @@ public class PersonInputCollector {
             if (cpf.trim().equals("0")) {
                 return null;
             }
+            cpf = cpf.replaceAll("\\D", "");
+
             if (CpfValidator.isValid(cpf)) {
                 return cpf;
             }
 
-            ui.showError("\n Erro! CPF inválido 11 números, apenas números.");
+            ui.showError("\n[Erro] CPF inválido 11 números, apenas números.");
         } while (true);
     }
 

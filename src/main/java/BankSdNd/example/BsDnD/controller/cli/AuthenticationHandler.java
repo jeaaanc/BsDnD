@@ -3,6 +3,7 @@ package BankSdNd.example.BsDnD.controller.cli;
 import BankSdNd.example.BsDnD.domain.BankUser;
 import BankSdNd.example.BsDnD.dto.LoginDto;
 import BankSdNd.example.BsDnD.dto.PersonDto;
+import BankSdNd.example.BsDnD.exception.business.DuplicateException;
 import BankSdNd.example.BsDnD.menu.ConsoleUI;
 import BankSdNd.example.BsDnD.service.AccountService;
 import BankSdNd.example.BsDnD.service.AuthService;
@@ -26,7 +27,7 @@ public class AuthenticationHandler {
 
     public AuthenticationHandler(AuthService authService, PersonService personService,
                                  AccountService accountService
-                                 ) {
+    ) {
         this.authService = authService;
         this.personService = personService;
         this.accountService = accountService;
@@ -35,24 +36,32 @@ public class AuthenticationHandler {
 
     /**
      * Displays and manages the registration sub-menu.
-     * It presents options for creating new users and handles user navigation.
-     * The loop terminates when the user chooses to go back to the main menu.
+     * Allows the user to navigate the creation process and returns the successfully
+     * created user back to the main menu for automatic login.
      *
      * @param sc The {@code Scanner} instance for reading user input.
-     * @param ui The {@code ConsoleUI} instance for displaying all user-facing messages.
+     * @param ui The {@code ConsoleUI} instance for displaying messages.
+     * @return The created {@code BankUser} if the registration is successful,
+     * or {@code null} if the user chooses to go back without registering.
      */
-    public void showCreate(Scanner sc, ConsoleUI ui) {
+    public BankUser showCreate(Scanner sc, ConsoleUI ui) {
 
         while (true) {
             ui.displayRegisterAll();
 
             int choice = InputUtils.readInt(sc, "Escolha uma Opção: ");
-            switch (choice){
+            switch (choice) {
                 case 0 -> ui.clearScreen();
-                case 1 -> registerUser(sc, ui);
+                case 1 -> {
+                    BankUser newUser = registerUser(sc, ui);
+
+                    if (newUser != null) {
+                        return newUser;
+                    }
+                }
                 case 9 -> {
                     ui.showMenuGoBack();
-                    return;
+                    return null;
                 }
 
                 default -> ui.showChoseOptions();
@@ -92,7 +101,7 @@ public class AuthenticationHandler {
                 ui.showValidationError(e.getMessage());
 
                 if (attempts < MAX_ATTEMPTS) {
-                  ui.showAttemptsRemaining (MAX_ATTEMPTS - attempts);
+                    ui.showAttemptsRemaining(MAX_ATTEMPTS - attempts);
                 }
             }
         }
@@ -102,29 +111,35 @@ public class AuthenticationHandler {
     }
 
     /**
-     * Handles the user registration flow. It orchestrates the creation of an input collector,
-     * the gathering of user data, and the call to the person service to persist the new user.
+     * Handles the step-by-step user registration flow.
+     * Orchestrates data collection and calls the service layer to persist the new user.
      *
-     * @param scanner The {@code Scanner} instance for user input.
-     * @param ui The {@code ConsoleUI} instance for displaying all user-facing messages.
+     * @param scanner The {@code Scanner} instance for reading user input.
+     * @param ui      The {@code ConsoleUI} instance for displaying messages.
+     * @return The newly created and persisted {@code BankUser}, or {@code null}
+     * if the user cancels the operation or if data validation fails.
      */
-    public void registerUser(Scanner scanner, ConsoleUI ui) {
-            ui.showCreateUser();
+    public BankUser registerUser(Scanner scanner, ConsoleUI ui) {
+        ui.showCreateUser();
 
-            PersonInputCollector collector = new PersonInputCollector(ui);
-            PersonDto dto = collector.collectUserInput(scanner);
+        PersonInputCollector collector = new PersonInputCollector(ui);
+        PersonDto dto = collector.collectUserInput(scanner);
 
-            if (dto == null) {
-                ui.showRegisterError();
-                return;
-            }
+        if (dto == null) {
+            ui.showRegisterError();
+            return null;
+        }
 
-            try {
-                BankUser person = personService.savePerson(dto);
-                ui.showUserCreatedSuccessfully();
-            } catch (IllegalArgumentException e) {
-                ui.showValidationError(e.getMessage());
-            }
+        try {
+
+            BankUser person = personService.savePerson(dto);
+            ui.showUserCreatedSuccessfully();
+            return person;
+
+        } catch (IllegalArgumentException | DuplicateException e) {
+            ui.showValidationError(e.getMessage());
+            return null;
+        }
     }
 
 
@@ -134,7 +149,7 @@ public class AuthenticationHandler {
         if ("sair".equalsIgnoreCase(cpf)) {
             return null;
         }
-            char [] rawPassword = null;
+        char[] rawPassword = null;
 
         try {
 
@@ -150,7 +165,7 @@ public class AuthenticationHandler {
             return authService.login(loginDto);
         } finally {
 
-            if (rawPassword != null){
+            if (rawPassword != null) {
                 Arrays.fill(rawPassword, '\0');
             }
         }
