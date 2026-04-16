@@ -1,13 +1,12 @@
 package BankSdNd.example.BsDnD.controller.api;
 
 import BankSdNd.example.BsDnD.domain.Account;
-import BankSdNd.example.BsDnD.dto.AccountRequest;
+import BankSdNd.example.BsDnD.domain.BankUser;
 import BankSdNd.example.BsDnD.dto.AccountResponse;
 import BankSdNd.example.BsDnD.dto.UserUpdateDtos;
 import BankSdNd.example.BsDnD.service.AccountService;
-import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,16 +22,16 @@ public class AccountRestController {
     }
 
     @PostMapping
-    public ResponseEntity<AccountResponse> createAccount(@RequestBody @Valid AccountRequest request) {
+    public ResponseEntity<AccountResponse> createAccount(@AuthenticationPrincipal BankUser user) {
 
-        Account account = accountService.accountCreate(request.cpf());
+        Account account = accountService.accountCreate(user.getCpf());
 
         return ResponseEntity.ok(mapToAccountResponse(account));
     }
 
     @GetMapping
-    public ResponseEntity<List<AccountResponse>> listAllAccounts() {
-        List<Account> accounts = accountService.findAllActive();
+    public ResponseEntity<List<AccountResponse>> listMyAccounts(@AuthenticationPrincipal BankUser user) {
+        List<Account> accounts = accountService.findAllByUserCpf(user.getCpf());
 
         List<AccountResponse> responses = accounts.stream()
                 .map(this::mapToAccountResponse)

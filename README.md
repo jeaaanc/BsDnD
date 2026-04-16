@@ -1,118 +1,92 @@
-# BsDnD - Simulador de Banco com Arquitetura Evolutiva (CLI + API REST)
+# BsDnD - Sistema Bancário Híbrido (CLI e API REST)
 
-[![Java](https://img.shields.io/badge/Java-17-blue.svg)](https://adoptium.net/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.3-brightgreen.svg)](https://spring.io/projects/spring-boot)
-[![Maven](https://img.shields.io/badge/Maven-3.9-orange.svg)](https://maven.apache.org/)
+## Sobre o Projeto
 
-##  Sobre o Projeto
+O BsDnD é um ecossistema bancário simulado desenvolvido em Java e Spring Boot, concebido como um **projeto de evolução contínua**. O sistema demonstra a transição de uma aplicação de linha de comando (CLI) para um ambiente híbrido com API REST completa.
 
-**BsDnD** é um projeto de estudos focado na construção de um sistema bancário simulado, desenvolvido com Java e Spring Boot. O projeto nasceu como uma **aplicação de linha de comando (CLI)** robusta, com o objetivo de solidificar conceitos fundamentais de backend, como segurança, design de software e arquitetura em camadas.
+O foco central deste repositório é a aplicação de princípios de engenharia de software de nível corporativo, com ênfase em segurança, escalabilidade e manutenibilidade através de padrões de design modernos.
 
-O objetivo principal é a **evolução contínua**. A base de código foi projetada para ser escalável, e o próximo grande passo é a implementação de uma **camada de API REST**, transformando a aplicação em um sistema híbrido que pode ser operado tanto via terminal (`--cli`) quanto por requisições HTTP, refletindo um ambiente de mercado mais realista.
+---
 
-Este repositório serve como um portfólio dinâmico, demonstrando não apenas o produto final, mas o processo de refatoração, a aplicação de boas práticas e a evolução arquitetural de um sistema.
+## Funcionalidades Principais
 
-##  Funcionalidades Atuais (Modo CLI)
+### Interface de Linha de Comando (CLI)
+- Menu Interativo: Fluxo completo de navegação via terminal.
+- Autenticação Segura: Sistema de login com proteção de senha no console.
+- Gestão de Contas: Abertura de contas e consulta de saldos/extratos.
+- Operações Transacionais: Transferências entre contas com validação de senha de transação.
+- Sistema de Empréstimos: Cálculo dinâmico de limites baseado em renda e bônus.
 
-* **Gestão de Usuários:** Cadastro e autenticação de novos usuários.
-* **Gestão de Contas:** Abertura de contas bancárias associadas a um usuário.
-* **Operações Bancárias:**
-    * Consulta de saldo.
-    * Depósitos e Saques.
-    * Transferências entre contas.
-* **Produtos Financeiros:**
-    * Cálculo de limite e solicitação de empréstimos.
-* **Segurança:**
-    * Captura de senha segura (sem eco no terminal ou com máscara em GUI).
-    * Armazenamento de senhas com criptografia BCrypt.
-    * Re-autenticação por senha para operações sensíveis.
+### Interface API REST
+- Endpoints RESTful: Suporte a operações de usuários, contas e transferências via HTTP.
+- Segurança JWT: Proteção de rotas utilizando JSON Web Tokens.
+- Tratamento Global de Exceções: Respostas padronizadas para erros de negócio e técnicos.
 
-##  Arquitetura e Princípios de Design
+---
 
-Este projeto foi construído com foco em boas práticas de engenharia de software:
+## Arquitetura e Princípios SOLID
 
-* **Arquitetura em Camadas:** Clara separação entre `Controller`, `Service`, `Repository` e `Domain`.
-* **Injeção de Dependência:** Utilização do contêiner do Spring para gerenciar o ciclo de vida e as dependências dos componentes.
-* **Princípio da Responsabilidade Única (SRP):** Classes e métodos focados em uma única tarefa (ex: `LoanService` para empréstimos, `ConsoleUI` apenas para exibição).
-* **Segurança em Primeiro Lugar:** Tratamento cuidadoso de dados sensíveis (`char[]` para senhas, limpeza de memória).
-* **Tratamento de Erros Robusto:** Uso de uma hierarquia de exceções customizadas (`BusinessException`) para erros de negócio.
-* **Ambientes Separados:** Configuração de testes com um perfil (`test`) e banco de dados em memória (H2) para isolamento.
+O projeto foi estruturado para garantir extensibilidade e baixo acoplamento, aplicando rigorosamente os princípios **SOLID** (SRP, OCP, LSP, ISP e DIP) em toda a sua arquitetura em camadas. Esta abordagem facilita a manutenção e a escalabilidade, permitindo que o sistema cresça de forma modular e segura, garantindo que novas funcionalidades possam ser adicionadas com impacto mínimo no código existente.
 
-##  Tecnologias Utilizadas
+---
 
-* **Backend:** Java 17, Spring Boot
-* **Persistência:** Spring Data JPA, Hibernate
-* **Banco de Dados:** MySQL
-* **Build:** Maven
-* **Segurança:** Spring Security (PasswordEncoder)
-* **Migrações de Banco:** Flyway
-* **Conteinerização:** Docker, Docker Compose
+## Segurança Unificada
 
-##  Como Executar o Projeto
+O sistema utiliza uma infraestrutura de segurança compartilhada:
+- Contexto de Segurança Global: Tanto a API quanto a CLI utilizam o SecurityContextHolder do Spring Security para gerenciar a identidade do usuário.
+- Implementação de UserDetails: A entidade BankUser integra-se nativamente ao framework de segurança.
+- Criptografia: Uso de BCrypt para armazenamento de senhas e proteção de dados sensíveis em memória.
+- Filtros de Segurança: Validação de tokens Bearer para todas as requisições à API.
 
-Siga os passos abaixo para configurar e executar a aplicação em seu ambiente local.
+---
+
+## Documentação da API REST
+
+A API utiliza autenticação baseada em token.
+
+Fluxo de Autenticação:
+1. POST em /api/auth/login com CPF e senha.
+2. Recebimento do JWT.
+3. Inclusão do header "Authorization: Bearer <token>" em requisições subsequentes.
+
+Endpoints Principais:
+- POST /api/auth/login: Autenticação e geração de token.
+- POST /api/users: Cadastro de novos usuários.
+- GET /api/accounts: Listagem de contas do usuário autenticado.
+- POST /api/transfers: Execução de transferências entre contas.
+
+---
+
+## Como Executar
 
 ### Pré-requisitos
+- Java 17 ou superior.
+- Maven 3.9 ou superior.
+- MySQL Server.
 
-* [Java 17 (JDK)](https://adoptium.net/)
-* [Apache Maven](https://maven.apache.org/download.cgi)
-* [Git](https://git-scm.com/)
-* [MySQL Server](https://dev.mysql.com/downloads/mysql/)
-* (Opcional) [Docker](https://www.docker.com/products/docker-desktop/)
+### Configuração
+1. Clone o repositório.
+2. Crie o banco de dados 'bsdnd' no MySQL.
+3. Crie um arquivo .env na raiz do projeto com as seguintes variáveis:
+   DB_NAME=bsdnd
+   DB_USER=seu_usuario
+   DB_PASSWORD=sua_senha
 
-### Configuração do Ambiente
+### Execução Local
+- Para rodar a API (Modo Servidor): mvn spring-boot:run
+- Para rodar a CLI (Modo Interativo): java -jar target/BsDnD-0.0.1-SNAPSHOT.jar --cli
+- Para rodar via Docker: docker-compose up --build
 
-1.  **Clone o repositório:**
-    ```bash
-    git clone [https://github.com/jeaaanc/BsDnD.git](https://github.com/jeaaanc/BsDnD.git)
-    cd BsDnD
-    ```
+---
 
-2.  **Crie o Banco de Dados:**
-    Conecte-se ao seu servidor MySQL e execute o seguinte comando:
-    ```sql
-    CREATE DATABASE bsdnd CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-    ```
+## Testes Automatizados
 
-3.  **Crie o arquivo de ambiente:**
-    Na raiz do projeto (`BsDnD/`), crie um arquivo chamado `.env` e adicione suas credenciais do banco. O usuário definido (`DB_USER`) deve ter permissões no banco `bsdnd`.
-    ```env
-    DB_NAME=bsdnd
-    DB_USER=seu_usuario_mysql
-    DB_PASSWORD=sua_senha_mysql
-    ```
+O projeto utiliza JUnit 5 para testes de integração. A suíte de testes utiliza o perfil "test" com um banco de dados H2 em memória, garantindo isolamento total do ambiente de desenvolvimento.
+Comando para execução: mvn test
 
-### Opção 1: Rodando Localmente (Sem Docker)
+---
 
-1.  **Compile e empacote o projeto:**
-    Este comando também rodará os testes automatizados.
-    ```bash
-    mvn clean package
-    ```
-2.  **Execute a aplicação no modo interativo:**
-    ```bash
-    java -jar target/BsDnD-0.0.1-SNAPSHOT.jar --cli
-    ```
-    O menu da aplicação aparecerá no seu terminal.
+## Autor
 
-### Opção 2: Rodando com Docker
-
-1.  **Gere o arquivo `.jar`:**
-    O Docker precisa do arquivo `.jar` para construir a imagem. Rode o comando de build do Maven pelo menos uma vez:
-    ```bash
-    mvn clean package
-    ```
-2.  **Suba os contêineres:**
-    Este comando irá construir a imagem da sua aplicação e iniciar o contêiner do banco de dados e da aplicação.
-    ```bash
-    docker-compose up --build
-    ```
-    O menu interativo da aplicação aparecerá diretamente no seu terminal. Para parar os contêineres, pressione `Ctrl + C`.
-
-##  Testes
-
-O projeto possui um conjunto de testes de integração que é executado durante o build do Maven. Os testes rodam em um perfil "test" separado, utilizando um banco de dados em memória (H2) para garantir o isolamento e não afetar o banco de dados de desenvolvimento.
-
-##  Autor
-
-* **Jean da Cruz Silva** - [GitHub](https://github.com/jeaaanc)
+Jean da Cruz Silva
+GitHub: https://github.com/jeaaanc

@@ -63,14 +63,25 @@ public final class InputUtils {
     public static BigDecimal readBigDecimal(Scanner sc, String message) {
         while (true) {
             System.out.print(message);
-            String input = sc.nextLine();
+            String input = sc.nextLine().trim();
+
+            if (input.contains(",")){
+                System.out.println("\n[ERRO] Formato inválido! Não use vírgula (,).");
+                System.out.println("-> Use APENAS o ponto (.) para separar os centavos.");
+                System.out.println("-> Exemplo Certo: 2500.50\n");
+                continue;
+            }
             try {
-                String noPoint = input.replace(".", "");
-                String formatJava = noPoint.replace(",", ".");
-                return new BigDecimal(formatJava);
+                BigDecimal value = new BigDecimal(input);
+
+                if (value.compareTo(BigDecimal.ZERO) < 0){
+                    System.out.println("\n[ERRO] O valor não pode ser negativo.\n");
+                    continue;
+                }
+                return value;
 
             } catch (NumberFormatException e) {
-                System.out.print("Entrada inválida. Digite um valor numérico.");
+                System.out.print("\n[ERRO]Entrada inválida. Digite um valor numérico válido (Ex: 1500.50)\n");
             }
         }
     }

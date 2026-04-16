@@ -22,19 +22,18 @@ import java.util.List;
 public class LoanService {
 
     private final AccountService accountService;
+    private final FinancialCalculator financialCalculator;
 
-    private static final BigDecimal POINTS_DIVISOR = new BigDecimal("100.00");
-    private static final BigDecimal LOAN_MULTIPLIER = new BigDecimal("250.00");
-
-    public LoanService(AccountService accountService) {
+    public LoanService(AccountService accountService, FinancialCalculator financialCalculator) {
         this.accountService = accountService;
+        this.financialCalculator = financialCalculator;
     }
 
 
     /**
      * Calculates the available loan limit for a customer based on their total balance across all accounts.
      * This is a pure business logic method with no user interaction.
-     * The rule is: Limit = (Total Balance / 100) * 250.
+     * The rule is defined by the FinancialCalculator implementation.
      *
      * @param user The customer for whom the limit will be calculated. Must not be null.
      * @return The loan limit value as a {@code BigDecimal}.
@@ -42,11 +41,7 @@ public class LoanService {
     public BigDecimal calculateLoanLimit(BankUser user) {
 
         List<Account> accounts = accountService.searchClientAccount(user.getCpf());
-        BigDecimal totalBalance = accounts.stream()
-                .map(Account::getBalance)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        return totalBalance.divide(POINTS_DIVISOR, 2, RoundingMode.HALF_UP).multiply(LOAN_MULTIPLIER);
+        return financialCalculator.calculateLoanLimit(user, accounts);
     }
 
     /**

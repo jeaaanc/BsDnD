@@ -3,6 +3,9 @@ package BankSdNd.example.BsDnD.controller.cli;
 import BankSdNd.example.BsDnD.domain.BankUser;
 import BankSdNd.example.BsDnD.menu.ConsoleUI;
 import BankSdNd.example.BsDnD.util.InputUtils;
+
+import org.springframework.stereotype.Component;
+
 import java.util.Scanner;
 
 /**
@@ -10,6 +13,7 @@ import java.util.Scanner;
  * This class acts as the primary entry point for the user interface,
  * orchestrating the main menu and delegating actions to specialized handlers.
  */
+@Component
 public class ConsoleController {
 
     private final AuthenticationHandler authHandler;
@@ -27,10 +31,10 @@ public class ConsoleController {
 
 
     /**
-     * Starts and manages the main application loop.
-     * It displays the initial menu (e.g., Register, Login, Exit) and waits for user input,
-     * dispatching the chosen action to the appropriate handler. This loop runs until the
-     * user chooses to exit the application.
+     * Starts the application's main entry loop.
+     * Displays the primary menu, handles user choices for registration and login,
+     * and seamlessly transitions the user into an active session (auto-login)
+     * upon successful account creation or authentication.
      */
     public void display() {
         while (true) {
@@ -40,9 +44,15 @@ public class ConsoleController {
 
             switch (choice) {
                 case 0 -> ui.clearScreen();
-                case 1 -> authHandler.showCreate(sc, ui);
+                case 1 -> {
+                    BankUser user = authHandler.showCreate();
+
+                    if (user != null) {
+                        userSessionHandler.runUserSession(user);
+                    }
+                }
                 case 2 -> {
-                    BankUser user = authHandler.performLogin(sc, ui);
+                    BankUser user = authHandler.performLogin();
                     if (user != null) {
                         userSessionHandler.runUserSession(user);
                     }
@@ -55,8 +65,9 @@ public class ConsoleController {
             }
         }
     }
-    // testes: Alberto	Cunha	cpf:14521128009 senha 444 , numero da conta: 457833858
-    // / marcos	silva	12345678909 / 123 == 150.00
+
+    // testes: 	cpf:95741676073 senha 123456 , numero da conta:
+    // Jorge cpf: 73512227031 / 123456
 
 
 }

@@ -7,13 +7,15 @@ import BankSdNd.example.BsDnD.util.CurrencyUtils;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class ConsoleUI {
 
     public void displayRegisterAll() {
         System.out.println("=====Cadastros=====");
         System.out.println("""
                 1- Cadastrar nova Pessoa.
-                2- Fazer novo Pedido.
                 9- sair.
                 0- Limpar a tela.
                 """);

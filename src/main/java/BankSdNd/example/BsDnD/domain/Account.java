@@ -38,13 +38,10 @@ public class Account {
      */
     protected Account(){}
 
-    public Account(String numberAccount, BankUser holder, BigDecimal initialDeposit) {
+    public Account(String numberAccount, BankUser holder) {
         this.accountNumber = numberAccount;
         this.holder = holder;
         this.balance = BigDecimal.ZERO;
-        if (initialDeposit != null && initialDeposit.compareTo(BigDecimal.ZERO) > 0){
-            deposit(initialDeposit);
-        }
     }
 
 

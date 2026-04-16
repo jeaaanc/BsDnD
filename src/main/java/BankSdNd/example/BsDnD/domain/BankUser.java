@@ -2,7 +2,12 @@ package BankSdNd.example.BsDnD.domain;
 
 import jakarta.persistence.*;
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import java.math.BigDecimal;
+import java.util.Collection;
+import java.util.List;
 
 
 /**
@@ -14,7 +19,7 @@ import java.math.BigDecimal;
  */
 @Entity
 @Table(name = "bank_user")
-public class BankUser {
+public class BankUser implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -44,6 +49,36 @@ public class BankUser {
      * Use the {@link Builder} to create new instances.
      */
     protected BankUser() {
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of();
+    }
+
+    @Override
+    public String getUsername() {
+        return this.cpf;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 
     public void setPassword(String password) {
