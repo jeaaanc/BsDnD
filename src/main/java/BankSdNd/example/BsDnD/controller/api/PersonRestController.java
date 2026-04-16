@@ -47,17 +47,6 @@ public class PersonRestController {
         return ResponseEntity.ok(mapToResponse(updatedUser));
     }
 
-    @GetMapping
-    public ResponseEntity<List<UserUpdateDtos.UserResponse>> listAll() {
-        List<BankUser> users = personService.findAll();
-
-        List<UserUpdateDtos.UserResponse> response = users.stream()
-                .map(this::mapToResponse)
-                .toList();
-
-        return ResponseEntity.ok(response);
-    }
-
     @PatchMapping("/{id}/phone")
     public ResponseEntity<UserUpdateDtos.UserResponse> updatePhone(
             @PathVariable Long id,

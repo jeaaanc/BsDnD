@@ -12,6 +12,10 @@ import BankSdNd.example.BsDnD.util.InputUtils;
 import BankSdNd.example.BsDnD.util.PasswordUtils;
 import BankSdNd.example.BsDnD.util.PersonInputCollector;
 
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+
 import java.util.Arrays;
 import java.util.Scanner;
 
@@ -20,17 +24,22 @@ import java.util.Scanner;
  * This includes user registration, login attempts, and the associated sub-menus.
  * It orchestrates calls to business services and the UI view.
  */
+@Component
 public class AuthenticationHandler {
     private final AuthService authService;
     private final PersonService personService;
     private final AccountService accountService;
+    private final Scanner sc;
+    private final ConsoleUI ui;
 
     public AuthenticationHandler(AuthService authService, PersonService personService,
-                                 AccountService accountService
+                                 AccountService accountService, Scanner sc, ConsoleUI ui
     ) {
         this.authService = authService;
         this.personService = personService;
         this.accountService = accountService;
+        this.sc = sc;
+        this.ui = ui;
     }
 
 
@@ -39,12 +48,10 @@ public class AuthenticationHandler {
      * Allows the user to navigate the creation process and returns the successfully
      * created user back to the main menu for automatic login.
      *
-     * @param sc The {@code Scanner} instance for reading user input.
-     * @param ui The {@code ConsoleUI} instance for displaying messages.
      * @return The created {@code BankUser} if the registration is successful,
      * or {@code null} if the user chooses to go back without registering.
      */
-    public BankUser showCreate(Scanner sc, ConsoleUI ui) {
+    public BankUser showCreate() {
 
         while (true) {
             ui.displayRegisterAll();
@@ -53,7 +60,7 @@ public class AuthenticationHandler {
             switch (choice) {
                 case 0 -> ui.clearScreen();
                 case 1 -> {
-                    BankUser newUser = registerUser(sc, ui);
+                    BankUser newUser = registerUser();
 
                     if (newUser != null) {
                         return newUser;
@@ -74,21 +81,22 @@ public class AuthenticationHandler {
      * It orchestrates the UI display, input collection via helper methods, and calls
      * the authentication service to validate credentials.
      *
-     * @param sc The {@code Scanner} instance for user input.
-     * @param ui The {@code ConsoleUI} instance for displaying all user-facing messages.
      * @return The authenticated {@code BankUser} if the login is successful, or {@code null} if the user
      * cancels or exceeds the maximum attempts.
      */
-    public BankUser performLogin(Scanner sc, ConsoleUI ui) {
+    public BankUser performLogin() {
         int attempts = 0;
         final int MAX_ATTEMPTS = 3;
 
         while (attempts < MAX_ATTEMPTS) {
             ui.showDisplayLogin();
             try {
-                BankUser loggedUser = attemptLoginOnce(sc, ui);
+                BankUser loggedUser = attemptLoginOnce();
 
                 if (loggedUser != null) {
+                    var authentication = new UsernamePasswordAuthenticationToken(loggedUser, null, loggedUser.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+
                     ui.showLoginSuccessfully();
                     return loggedUser;
                 } else {
@@ -114,16 +122,14 @@ public class AuthenticationHandler {
      * Handles the step-by-step user registration flow.
      * Orchestrates data collection and calls the service layer to persist the new user.
      *
-     * @param scanner The {@code Scanner} instance for reading user input.
-     * @param ui      The {@code ConsoleUI} instance for displaying messages.
      * @return The newly created and persisted {@code BankUser}, or {@code null}
      * if the user cancels the operation or if data validation fails.
      */
-    public BankUser registerUser(Scanner scanner, ConsoleUI ui) {
+    public BankUser registerUser() {
         ui.showCreateUser();
 
         PersonInputCollector collector = new PersonInputCollector(ui);
-        PersonDto dto = collector.collectUserInput(scanner);
+        PersonDto dto = collector.collectUserInput(sc);
 
         if (dto == null) {
             ui.showRegisterError();
@@ -133,6 +139,10 @@ public class AuthenticationHandler {
         try {
 
             BankUser person = personService.savePerson(dto);
+
+            var authentication = new UsernamePasswordAuthenticationToken(person, null, person.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
             ui.showUserCreatedSuccessfully();
             return person;
 
@@ -143,7 +153,7 @@ public class AuthenticationHandler {
     }
 
 
-    private BankUser attemptLoginOnce(Scanner sc, ConsoleUI ui) {
+    private BankUser attemptLoginOnce() {
         String cpf = InputUtils.readString(sc, "CPF: (ou digite ´sair´ para cancelar): ");
 
         if ("sair".equalsIgnoreCase(cpf)) {

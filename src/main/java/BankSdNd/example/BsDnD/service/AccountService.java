@@ -7,6 +7,7 @@ import BankSdNd.example.BsDnD.repository.AccountRepository;
 import BankSdNd.example.BsDnD.repository.BankUserRepository;
 import BankSdNd.example.BsDnD.util.validation.AccountNumberGenerator;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,10 +31,6 @@ public class AccountService {
     private PasswordEncoder passwordEncoder;
     private final AccountNumberGenerator accountNumberGenerator;
 
-    private static final BigDecimal FIXED_BONUS = new BigDecimal("300");
-    private static final BigDecimal VARIABLE_BONUS = new BigDecimal("0.3");
-    // TODO: Implementar validação de saldo mínimo para nova conta
-
     public AccountService(AccountRepository accountRepository,
                           BankUserRepository bankUserRepository,
                           AccountNumberGenerator accountNumberGenerator,
@@ -46,7 +43,7 @@ public class AccountService {
 
     /**
      * Creates a new bank account for an existing user, identified by their CPF.
-     * The initial balance is calculated based on a fixed bonus and a percentage of the user's income.
+     * The initial balance is zero.
      * This operation is transactional.
      *
      * @param cpf The CPF of the BankUser who will own the new account. Must not be null.
@@ -58,11 +55,8 @@ public class AccountService {
         BankUser user = bankUserRepository.findByCpf(cpf)
                 .orElseThrow(() -> new UserNotFoundException("User with CPF " + cpf + " not found"));
 
-        BigDecimal bonusvariable = user.getIncome().multiply(VARIABLE_BONUS);
-        BigDecimal initialBalance = FIXED_BONUS.add(bonusvariable);
-
         String accountNumber = accountNumberGenerator.generateUniqueAccountNumber();
-        Account account = new Account(accountNumber, user, initialBalance);
+        Account account = new Account(accountNumber, user);
 
         return accountRepository.save(account);
     }
@@ -91,18 +85,19 @@ public class AccountService {
      * @param destinationAccountNumber The account number of the destination account.
      * @param value                    The amount to be transferred. Must be positive.
      * @param transactionPassword      The 4-digit transactional password of the account holder.
-     * @param loggedUser               The currently authenticated user making the request.
      * @throws AccountNotFoundException     if either the origin or destination account is not found.
      * @throws InsufficientBalanceException if the origin account does not have enough balance (thrown from the Account entity).
      * @throws AccessDeniedException        if the logged user is not the owner of the origin account.
      * @throws BusinessException            if the tra transaction password is invalid.
      */
     @Transactional
-    public void transfer(String originAccountNumber, String destinationAccountNumber, BigDecimal value, String transactionPassword, BankUser loggedUser) {
+    public void transfer(String originAccountNumber, String destinationAccountNumber, BigDecimal value, String transactionPassword) {
 
         if (value == null || value.compareTo(BigDecimal.ZERO) <= 0) {
             throw new InsufficientBalanceException("The tranfer amount must be greater than 0.");
         }
+
+        BankUser loggedUser = (BankUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         Account origin = accountRepository.findByAccountNumberAndActiveTrue(originAccountNumber)
                 .orElseThrow(() -> new AccountNotFoundException("Account: " + originAccountNumber + " not found."));
@@ -169,5 +164,9 @@ public class AccountService {
 
     public List<Account> findAllActive() {
         return accountRepository.findAllByActiveTrue();
+    }
+
+    public List<Account> findAllByUserCpf(String cpf) {
+        return accountRepository.findAllByCpf(cpf);
     }
 }

@@ -7,6 +7,9 @@ import BankSdNd.example.BsDnD.util.CurrencyUtils;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class ConsoleUI {
 
     public void displayRegisterAll() {

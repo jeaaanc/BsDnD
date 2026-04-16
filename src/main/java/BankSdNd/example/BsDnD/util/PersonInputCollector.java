@@ -160,7 +160,7 @@ public class PersonInputCollector {
         do {
             ui.print("\n(Digite '0' para cancelar o cadastro)");
 
-            cpf = InputUtils.readString(scanner, "CPF (Apenas números): ");
+            cpf = InputUtils.readString(scanner, "CPF: ");
             if (cpf.trim().equals("0")) {
                 return null;
             }
@@ -170,7 +170,7 @@ public class PersonInputCollector {
                 return cpf;
             }
 
-            ui.showError("\n[Erro] CPF inválido 11 números, apenas números.");
+            ui.showError("\n[Erro] CPF inválido 11 números.");
         } while (true);
     }
 

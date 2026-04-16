@@ -3,6 +3,9 @@ package BankSdNd.example.BsDnD.controller.cli;
 import BankSdNd.example.BsDnD.domain.BankUser;
 import BankSdNd.example.BsDnD.menu.ConsoleUI;
 import BankSdNd.example.BsDnD.util.InputUtils;
+
+import org.springframework.stereotype.Component;
+
 import java.util.Scanner;
 
 /**
@@ -10,6 +13,7 @@ import java.util.Scanner;
  * This class acts as the primary entry point for the user interface,
  * orchestrating the main menu and delegating actions to specialized handlers.
  */
+@Component
 public class ConsoleController {
 
     private final AuthenticationHandler authHandler;
@@ -41,14 +45,14 @@ public class ConsoleController {
             switch (choice) {
                 case 0 -> ui.clearScreen();
                 case 1 -> {
-                    BankUser user = authHandler.showCreate(sc, ui);
+                    BankUser user = authHandler.showCreate();
 
-                    if (user != null){
+                    if (user != null) {
                         userSessionHandler.runUserSession(user);
                     }
                 }
                 case 2 -> {
-                    BankUser user = authHandler.performLogin(sc, ui);
+                    BankUser user = authHandler.performLogin();
                     if (user != null) {
                         userSessionHandler.runUserSession(user);
                     }
@@ -61,6 +65,7 @@ public class ConsoleController {
             }
         }
     }
+
     // testes: 	cpf:95741676073 senha 123456 , numero da conta:
     // Jorge cpf: 73512227031 / 123456
 

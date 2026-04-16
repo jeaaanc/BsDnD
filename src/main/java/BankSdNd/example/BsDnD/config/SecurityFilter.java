@@ -35,8 +35,7 @@ public class SecurityFilter extends OncePerRequestFilter {
             if (!login.isEmpty()) {
 
                 userRepository.findByCpf(login).ifPresent(user -> {
-                    //!!!!!! Como seu BankUser não implementa UserDetails, passamos null para authorities por enquanto
-                    var authentication = new UsernamePasswordAuthenticationToken(user, null, java.util.Collections.emptyList());
+                    var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
 
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 });
