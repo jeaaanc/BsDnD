@@ -66,13 +66,13 @@ public class AccountService {
      *
      * @param cpf The CPF of the user whose accounts are to be retrieved.
      * @return A {@code List<Account>} containing all found accounts for the user.
-     * @throws UserNotFoundException if no accounts are found for the given CPF.
+     * @throws AccountNotFoundException if no accounts are found for the given CPF.
      */
     public List<Account> searchClientAccount(String cpf) {
         List<Account> accounts = accountRepository.findAllByCpf(cpf);
 
         if (accounts.isEmpty()) {
-            throw new UserNotFoundException("No account found for the given CPF: " + cpf);
+            throw new AccountNotFoundException("No account found for the given CPF: " + cpf);
         }
         return accounts;
     }

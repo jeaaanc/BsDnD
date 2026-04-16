@@ -83,15 +83,22 @@ public class AccountOperationHandler {
     }
 
     public void handleAccountDeletion(BankUser currentUser) {
+        if (!requireActiveAccount(currentUser)) {
+            return;
+        }
         ui.showDeleteAccountMenu();
         balance(currentUser);
 
-        int accountIndex = InputUtils.readInt(sc, "Digite o número da conta da lista a cima" +
+        int accountIndex = InputUtils.readInt(sc, "Digite o número da conta da lista acima" +
                 " que deseja encerrar (0 para cancelar): ");
         if (accountIndex == 0) return;
 
         try {
             List<Account> accounts = accountService.searchClientAccount(currentUser.getCpf());
+            if (accountIndex < 1 || accountIndex > accounts.size()) {
+                ui.showError("Opção inválida.");
+                return;
+            }
             Long idToDelete = accounts.get(accountIndex - 1).getId();
 
             accountService.softDeleteAccount(idToDelete);
@@ -111,7 +118,8 @@ public class AccountOperationHandler {
                 return false;
             }
             return true;
-        } catch (AccountNotFoundException e) {
+            // ! dar uma olhada depois em uma exception melhor !
+        } catch (BusinessException e) {
             ui.showError("\n[Ação Negada] Você ainda não possui uma conta bancária ativa!");
             ui.print("-> Por favor, use a opção '1- Criar conta' no menu principal primeiro.\n");
             return false;
