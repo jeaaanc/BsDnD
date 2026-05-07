@@ -45,6 +45,11 @@ public class Account {
     }
 
 
+    public boolean isOwnedBy(Long userId) {
+        return this.holder != null && this.holder.getId().equals(userId);
+    }
+
+
     /**
      * Deposits a given amount into the account.
      *

@@ -3,11 +3,14 @@ package BankSdNd.example.BsDnD.service;
 import BankSdNd.example.BsDnD.domain.Account;
 import BankSdNd.example.BsDnD.domain.BankUser;
 import BankSdNd.example.BsDnD.exception.business.LoanLimitExceededException;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.CharBuffer;
 import java.util.List;
 
 
@@ -23,10 +26,12 @@ public class LoanService {
 
     private final AccountService accountService;
     private final FinancialCalculator financialCalculator;
+    private final PasswordEncoder passwordEncoder;
 
-    public LoanService(AccountService accountService, FinancialCalculator financialCalculator) {
+    public LoanService(AccountService accountService, FinancialCalculator financialCalculator, PasswordEncoder passwordEncoder) {
         this.accountService = accountService;
         this.financialCalculator = financialCalculator;
+        this.passwordEncoder = passwordEncoder;
     }
 
 
@@ -38,6 +43,7 @@ public class LoanService {
      * @param user The customer for whom the limit will be calculated. Must not be null.
      * @return The loan limit value as a {@code BigDecimal}.
      */
+    @PreAuthorize("hasRole('USER') and principal.username == #user.cpf")
     public BigDecimal calculateLoanLimit(BankUser user) {
 
         List<Account> accounts = accountService.searchClientAccount(user.getCpf());
@@ -50,12 +56,18 @@ public class LoanService {
      *
      * @param user The customer who will receive the loan. Must not be null.
      * @param requestedAmount The amount requested for the loan.
+     * @param transactionPassword The 4-digit transactional password of the account holder.
      * @return The {@code Account} that received the loan deposit, with its updated balance.
      * @throws LoanLimitExceededException if the requested amount is greater than the user's available limit.
      * @throws IllegalArgumentException if the requested amount is not positive, or if the user has no accounts to receive the deposit.
      */
     @Transactional
-    public Account grantLoan(BankUser user, BigDecimal requestedAmount) {
+    @PreAuthorize("hasRole('USER') and principal.username == #user.cpf")
+    public Account grantLoan(BankUser user, BigDecimal requestedAmount, char[] transactionPassword) {
+
+        if (!passwordEncoder.matches(CharBuffer.wrap(transactionPassword), user.getTransactionPassword())) {
+            throw new IllegalArgumentException("Invalid transaction password. Loan denied.");
+        }
 
         BigDecimal limit = calculateLoanLimit(user);
         if (requestedAmount.compareTo(limit) > 0) {

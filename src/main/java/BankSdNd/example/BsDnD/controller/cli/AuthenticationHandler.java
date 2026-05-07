@@ -71,7 +71,7 @@ public class AuthenticationHandler {
                     return null;
                 }
 
-                default -> ui.showChoseOptions();
+                default -> ui.showChooseOptions();
             }
         }
     }

@@ -7,12 +7,12 @@ import BankSdNd.example.BsDnD.exception.business.UserNotFoundException;
 import BankSdNd.example.BsDnD.repository.BankUserRepository;
 import BankSdNd.example.BsDnD.util.validation.CpfValidator;
 import BankSdNd.example.BsDnD.util.validation.PhoneValidator;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import org.springframework.security.access.AccessDeniedException;
 import java.util.List;
 
 
@@ -64,14 +64,14 @@ public class PersonService {
         String encryptedPassword = passwordEncoder.encode(dto.password());
         String encryptedTransactionPassword = passwordEncoder.encode(dto.transactionPassword());
 
-        BankUser person = new BankUser.Builder()
+        BankUser person = BankUser.builder()
                 .name(dto.name())
                 .lastName(dto.lastName())
                 .cpf(dto.cpf())
                 .phoneNumber(dto.phoneNumber())
                 .income(dto.income())
-                .passWord(encryptedPassword)
-                .transctionPassword(encryptedTransactionPassword)
+                .password(encryptedPassword)
+                .transactionPassword(encryptedTransactionPassword)
                 .build();
 
         return personRepository.save(person);
@@ -89,11 +89,9 @@ public class PersonService {
      * @throws DuplicateException       if the new phone number is already in use by another user.
      */
     @Transactional
-    public BankUser updatePhoneNumber(Long userId, String newPhoneNumber, BankUser loggedUser) {
-        // v exception
-        if (!loggedUser.getId().equals(userId)){
-            throw new AccessDeniedException("Você não tem permissão para alterar este usuário.");
-        }
+    @PreAuthorize("#userId == principal.id")
+    public BankUser updatePhoneNumber(Long userId, String newPhoneNumber) {
+
         if (!PhoneValidator.isValidPhoneNumber(newPhoneNumber)) {
             throw new IllegalArgumentException("New phone number is invalid.");
         }
@@ -121,11 +119,8 @@ public class PersonService {
      * @throws IllegalArgumentException if the new first name or last name are null or empty.
      */
     @Transactional
-    public BankUser updateName(Long userId, String newFirstName, String newLastName, BankUser loggedUser) {
-
-        if (!loggedUser.getId().equals(userId)){
-            throw new AccessDeniedException("Você não tem permissão para alterar este usuário.");
-        }
+    @PreAuthorize("#userId == principal.id")
+    public BankUser updateName(Long userId, String newFirstName, String newLastName) {
 
         if (!StringUtils.hasText(newFirstName) || !StringUtils.hasText(newLastName)) {
             throw new IllegalArgumentException("First name and last name cannot be empty.");

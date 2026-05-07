@@ -2,9 +2,11 @@ package BankSdNd.example.BsDnD.controller.api;
 
 import BankSdNd.example.BsDnD.domain.Account;
 import BankSdNd.example.BsDnD.domain.BankUser;
+import BankSdNd.example.BsDnD.dto.AccountCreateRequest;
 import BankSdNd.example.BsDnD.dto.AccountResponse;
 import BankSdNd.example.BsDnD.dto.UserUpdateDtos;
 import BankSdNd.example.BsDnD.service.AccountService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -22,10 +24,10 @@ public class AccountRestController {
     }
 
     @PostMapping
-    public ResponseEntity<AccountResponse> createAccount(@AuthenticationPrincipal BankUser user) {
+    public ResponseEntity<AccountResponse> createAccount(@AuthenticationPrincipal BankUser user, 
+                                                       @RequestBody @Valid AccountCreateRequest request) {
 
-        Account account = accountService.accountCreate(user.getCpf());
-
+        Account account = accountService.createAccount(user.getCpf(), request.transactionPassword());
         return ResponseEntity.ok(mapToAccountResponse(account));
     }
 

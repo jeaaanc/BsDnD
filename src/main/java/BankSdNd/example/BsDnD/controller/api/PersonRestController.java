@@ -7,7 +7,6 @@ import BankSdNd.example.BsDnD.service.AuthService;
 import BankSdNd.example.BsDnD.service.PersonService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -38,11 +37,10 @@ public class PersonRestController {
     @PatchMapping("/{id}/name")
     public ResponseEntity<UserUpdateDtos.UserResponse> updateName(
             @PathVariable Long id,
-            @RequestBody @Valid UserUpdateDtos.Name request,
-            @AuthenticationPrincipal BankUser loggedUser
+            @RequestBody @Valid UserUpdateDtos.Name request
     ) {
 
-        BankUser updatedUser = personService.updateName(id, request.name(), request.lastName(), loggedUser);
+        BankUser updatedUser = personService.updateName(id, request.name(), request.lastName());
 
         return ResponseEntity.ok(mapToResponse(updatedUser));
     }
@@ -50,11 +48,10 @@ public class PersonRestController {
     @PatchMapping("/{id}/phone")
     public ResponseEntity<UserUpdateDtos.UserResponse> updatePhone(
             @PathVariable Long id,
-            @RequestBody @Valid UserUpdateDtos.Phone request,
-            @AuthenticationPrincipal BankUser loggedUser
+            @RequestBody @Valid UserUpdateDtos.Phone request
     ) {
 
-        BankUser updatedUser = personService.updatePhoneNumber(id, request.phoneNumber(), loggedUser);
+        BankUser updatedUser = personService.updatePhoneNumber(id, request.phoneNumber());
 
         return ResponseEntity.ok(mapToResponse(updatedUser));
     }
@@ -62,11 +59,21 @@ public class PersonRestController {
     @PatchMapping("/{id}/password")
     public ResponseEntity<Void> updatePassword(
             @PathVariable Long id,
-            @RequestBody @Valid UserUpdateDtos.password request,
-            @AuthenticationPrincipal BankUser loggedUser
+            @RequestBody @Valid UserUpdateDtos.password request
     ) {
 
-         authService.updatePassword(id, request.oldPassword(), request.newPassword(), loggedUser);
+         authService.updatePassword(id, request.oldPassword(), request.newPassword());
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/transaction-password")
+    public ResponseEntity<Void> updateTransactionPassword(
+            @PathVariable Long id,
+            @RequestBody @Valid UserUpdateDtos.TransactionPassword request
+    ) {
+
+        authService.updateTransactionPassword(id, request.oldTransactionPassword(), request.newTransactionPassword());
 
         return ResponseEntity.noContent().build();
     }

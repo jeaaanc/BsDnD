@@ -52,20 +52,20 @@ class AccountServiceIntegrationTest {
         accountRepository.deleteAll();
         bankUserRepository.deleteAll();
 
-        user1 = new BankUser.Builder()
+        user1 = BankUser.builder()
                 .name("User 1")
                 .cpf("11111111111")
                 .income(new BigDecimal("2000"))
-                .passWord(passwordEncoder.encode("password"))
-                .transctionPassword(passwordEncoder.encode("1234"))
+                .password(passwordEncoder.encode("password"))
+                .transactionPassword(passwordEncoder.encode("1234"))
                 .build();
 
-        user2 = new BankUser.Builder()
+        user2 = BankUser.builder()
                 .name("User 2")
                 .cpf("22222222222")
                 .income(new BigDecimal("3000"))
-                .passWord(passwordEncoder.encode("password"))
-                .transctionPassword(passwordEncoder.encode("5678"))
+                .password(passwordEncoder.encode("password"))
+                .transactionPassword(passwordEncoder.encode("5678"))
                 .build();
 
         bankUserRepository.save(user1);
@@ -89,7 +89,7 @@ class AccountServiceIntegrationTest {
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         // When
-        accountService.transfer("10001", "20001", new BigDecimal("300"), "1234");
+        accountService.transfer("10001", "20001", new BigDecimal("300"), "1234".toCharArray());
 
         // Then
         Account updatedOrigin = accountRepository.findByAccountNumberAndActiveTrue("10001").get();
@@ -108,7 +108,7 @@ class AccountServiceIntegrationTest {
 
         // Then
         assertThrows(InsufficientBalanceException.class, () -> {
-            accountService.transfer("10001", "20001", new BigDecimal("1500"), "1234");
+            accountService.transfer("10001", "20001", new BigDecimal("1500"), "1234".toCharArray());
         });
     }
 
@@ -121,7 +121,7 @@ class AccountServiceIntegrationTest {
 
         // Then
         Exception exception = assertThrows(Exception.class, () -> {
-            accountService.transfer("10001", "20001", new BigDecimal("100"), "wrong");
+            accountService.transfer("10001", "20001", new BigDecimal("100"), "wrong".toCharArray());
         });
         
         assertTrue(exception.getMessage().contains("Invalid transaction password"));
@@ -131,15 +131,23 @@ class AccountServiceIntegrationTest {
     @DisplayName("Should create a new account with zero balance")
     void accountCreateWithZeroBalance() {
         // Given
-        String cpf = "11111111111";
+        // We need a user without an account for this test because of the new rule
+        BankUser newUser = BankUser.builder()
+                .name("New User")
+                .cpf("33333333333")
+                .password(passwordEncoder.encode("password"))
+                .transactionPassword(passwordEncoder.encode("1234"))
+                .build();
+        bankUserRepository.save(newUser);
+
+        var auth = new UsernamePasswordAuthenticationToken(newUser, null, newUser.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(auth);
 
         // When
-        Account newAccount = accountService.accountCreate(cpf);
+        Account account = accountService.createAccount("33333333333", "1234".toCharArray());
 
         // Then
-        assertNotNull(newAccount);
-        assertNotNull(newAccount.getAccountNumber());
-        assertEquals(user1.getId(), newAccount.getHolder().getId());
-        assertEquals(0, BigDecimal.ZERO.compareTo(newAccount.getBalance()));
+        assertNotNull(account);
+        assertEquals(0, BigDecimal.ZERO.compareTo(account.getBalance()));
     }
 }

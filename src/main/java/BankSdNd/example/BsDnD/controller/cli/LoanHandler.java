@@ -4,6 +4,7 @@ import BankSdNd.example.BsDnD.domain.Account;
 import BankSdNd.example.BsDnD.domain.BankUser;
 import BankSdNd.example.BsDnD.menu.ConsoleUI;
 import BankSdNd.example.BsDnD.service.LoanService;
+import BankSdNd.example.BsDnD.util.AccountInputCollector;
 import BankSdNd.example.BsDnD.util.CurrencyUtils;
 import BankSdNd.example.BsDnD.util.InputUtils;
 import BankSdNd.example.BsDnD.util.PasswordUtils;
@@ -18,6 +19,7 @@ public class LoanHandler {
 
     private final LoanService loanService;
     private final AccountOperationHandler accountOperationHandler;
+    private final AccountInputCollector inputCollector;
     private final Scanner sc;
     private final ConsoleUI ui;
 
@@ -27,6 +29,7 @@ public class LoanHandler {
                        ConsoleUI ui) {
         this.loanService = loanService;
         this.accountOperationHandler = accountOperationHandler;
+        this.inputCollector = new AccountInputCollector(sc, ui);
         this.sc = sc;
         this.ui = ui;
     }
@@ -49,36 +52,23 @@ public class LoanHandler {
             return;
         }
 
-        String isPasswordConfirmed = captureTransactionPassword();
-        if (isPasswordConfirmed == null) {
+        char[] capturedPassword = inputCollector.captureTransactionPassword();
+        if (capturedPassword == null) {
             ui.showPasswordValidationError();
             return;
         }
 
         try {
-            Account updateAccount = loanService.grantLoan(currentUser, requesAmount);
-            ui.showLoanSucess(updateAccount, requesAmount);
+            Account updateAccount = loanService.grantLoan(currentUser, requesAmount, capturedPassword);
+            ui.showLoanSuccess(updateAccount, requesAmount);
         } catch (Exception e) {
-            ui.showResquestLoanErro(e.getMessage());
+            ui.showLoanRequestError(e.getMessage());
+        } finally {
+            Arrays.fill(capturedPassword, '\0');
         }
     }
 
-    private String captureTransactionPassword() {
-        char[] rawPassword = null;
-        try {
-            ui.showConfimedPassword();
-            rawPassword = PasswordUtils.catchPassword("Senha de transação: ");
-
-            if (rawPassword == null || rawPassword.length == 0) {
-                ui.showPasswordNull();
-                return null;
-            }
-
-            return new String(rawPassword);
-        } finally {
-            if (rawPassword != null) {
-                Arrays.fill(rawPassword, '\0');
-            }
-        }
+    private char[] captureTransactionPassword() {
+        return inputCollector.captureTransactionPassword();
     }
 }

@@ -3,7 +3,6 @@ package BankSdNd.example.BsDnD.controller.api;
 import BankSdNd.example.BsDnD.domain.BankUser;
 import BankSdNd.example.BsDnD.dto.LoginDto;
 import BankSdNd.example.BsDnD.dto.LoginResponseDto;
-import BankSdNd.example.BsDnD.dto.UserUpdateDtos;
 import BankSdNd.example.BsDnD.service.AuthService;
 import BankSdNd.example.BsDnD.service.TokenService;
 import jakarta.validation.Valid;

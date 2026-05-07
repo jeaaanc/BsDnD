@@ -36,11 +36,11 @@ public record PersonDto(
     @Positive(message = "A renda deve ser um valor positivo")
     BigDecimal income,
 
-    @NotBlank(message = "A senha de login é obrigatório")
-    @Pattern(regexp = "^\\d{6}$", message = "A senha de login deve ter no mínimo 6 números.")
+    @NotBlank(message = "A senha de login é obrigatória")
+    @Pattern(regexp = "^\\d{6}$", message = "A senha de login deve ter 6 números.")
     String password,
 
-    @NotBlank(message = "A senha é obrigatório")
-    @Pattern(regexp = "^\\d{4}$", message = "A senha de transação deve ter no mínimo 4 números.")
+    @NotBlank(message = "A senha de transação é obrigatória")
+    @Pattern(regexp = "^\\d{4}$", message = "A senha de transação deve ter 4 números.")
     String transactionPassword
 ) {}

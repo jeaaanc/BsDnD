@@ -50,7 +50,7 @@ public class TokenService {
                     .getSubject();
 
         } catch (Exception e) {
-            return "";
+            return null;
         }
     }
 

@@ -32,7 +32,7 @@ public class SecurityFilter extends OncePerRequestFilter {
         if (token != null) {
 
             var login = tokenService.validateToken(token);
-            if (!login.isEmpty()) {
+            if (login != null) {
 
                 userRepository.findByCpf(login).ifPresent(user -> {
                     var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());

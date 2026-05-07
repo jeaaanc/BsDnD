@@ -64,7 +64,7 @@ public class UserSessionHandler {
                 case 6 -> accountOperationHandler.handleAccountDeletion(this.currentUser);
                 case 9 -> loggedIn = false;
                 case 0 -> ui.clearScreen();
-                default -> ui.showChoseOptions();
+                default -> ui.showChooseOptions();
             }
         }
         this.currentUser = null;

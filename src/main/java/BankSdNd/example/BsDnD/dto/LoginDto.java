@@ -14,5 +14,6 @@ public record LoginDto (
     @NotBlank(message = "O CPF é obrigatório")
     String cpf,
     @NotBlank(message = "A senha é obrigatória")
+    @jakarta.validation.constraints.Pattern(regexp = "^\\d{6}$", message = "A senha de login deve ter 6 números.")
     String password
 ) {}

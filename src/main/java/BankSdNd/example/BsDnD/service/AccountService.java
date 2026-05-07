@@ -6,13 +6,12 @@ import BankSdNd.example.BsDnD.exception.business.*;
 import BankSdNd.example.BsDnD.repository.AccountRepository;
 import BankSdNd.example.BsDnD.repository.BankUserRepository;
 import BankSdNd.example.BsDnD.util.validation.AccountNumberGenerator;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import org.springframework.security.access.AccessDeniedException;
 import java.util.List;
 
 
@@ -42,18 +41,30 @@ public class AccountService {
     }
 
     /**
-     * Creates a new bank account for an existing user, identified by their CPF.
-     * The initial balance is zero.
-     * This operation is transactional.
+     * Creates a new bank account for an existing user.
+     * Validates the user's transaction password and ensures they don't already have an active account.
      *
-     * @param cpf The CPF of the BankUser who will own the new account. Must not be null.
-     * @return The newly created and persisted Account object.
-     * @throws UserNotFoundException if no user is found with the given CPF.
+     * @param cpf                 The CPF of the user.
+     * @param transactionPassword The user's 4-digit transaction password as a String.
+     * @return The newly created Account.
+     * @throws UserNotFoundException    if user not found.
+     * @throws BusinessException         if password is wrong or account already exists.
      */
     @Transactional
-    public Account accountCreate(String cpf) {
+    @PreAuthorize("principal.username == #cpf")
+    public Account createAccount(String cpf, String transactionPassword) {
         BankUser user = bankUserRepository.findByCpf(cpf)
                 .orElseThrow(() -> new UserNotFoundException("User with CPF " + cpf + " not found"));
+
+        if (!passwordEncoder.matches(transactionPassword, user.getTransactionPassword())) {
+            throw new BusinessException("Invalid transaction password. Account creation denied.");
+        }
+
+
+        List<Account> existingAccounts = accountRepository.findAllByCpf(cpf);
+        if (existingAccounts.size() >= 3) {
+            throw new BusinessException("User has reached the maximum limit of 3 accounts.");
+        }
 
         String accountNumber = accountNumberGenerator.generateUniqueAccountNumber();
         Account account = new Account(accountNumber, user);
@@ -62,19 +73,28 @@ public class AccountService {
     }
 
     /**
+     * Overloaded method for creating an account using a char array for the password.
+     * Securely converts the char array to a String, performs the operation, and clears the array.
+     */
+    @Transactional
+    public Account createAccount(String cpf, char[] transactionPassword) {
+        try {
+            return createAccount(cpf, new String(transactionPassword));
+        } finally {
+            if (transactionPassword != null) {
+                java.util.Arrays.fill(transactionPassword, '\0');
+            }
+        }
+    }
+
+    /**
      * Finds all bank accounts associated with a user's CPF.
      *
      * @param cpf The CPF of the user whose accounts are to be retrieved.
      * @return A {@code List<Account>} containing all found accounts for the user.
-     * @throws AccountNotFoundException if no accounts are found for the given CPF.
      */
     public List<Account> searchClientAccount(String cpf) {
-        List<Account> accounts = accountRepository.findAllByCpf(cpf);
-
-        if (accounts.isEmpty()) {
-            throw new AccountNotFoundException("No account found for the given CPF: " + cpf);
-        }
-        return accounts;
+        return accountRepository.findAllByCpf(cpf);
     }
 
     /**
@@ -84,27 +104,21 @@ public class AccountService {
      * @param originAccountNumber      The account number of the source account.
      * @param destinationAccountNumber The account number of the destination account.
      * @param value                    The amount to be transferred. Must be positive.
-     * @param transactionPassword      The 4-digit transactional password of the account holder.
+     * @param transactionPassword      The 4-digit transactional password of the account holder as a String.
      * @throws AccountNotFoundException     if either the origin or destination account is not found.
      * @throws InsufficientBalanceException if the origin account does not have enough balance (thrown from the Account entity).
-     * @throws AccessDeniedException        if the logged user is not the owner of the origin account.
      * @throws BusinessException            if the tra transaction password is invalid.
      */
     @Transactional
+    @PreAuthorize("@accountService.isAccountNumberOwner(#originAccountNumber, principal.id)")
     public void transfer(String originAccountNumber, String destinationAccountNumber, BigDecimal value, String transactionPassword) {
 
         if (value == null || value.compareTo(BigDecimal.ZERO) <= 0) {
             throw new InsufficientBalanceException("The tranfer amount must be greater than 0.");
         }
 
-        BankUser loggedUser = (BankUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
         Account origin = accountRepository.findByAccountNumberAndActiveTrue(originAccountNumber)
                 .orElseThrow(() -> new AccountNotFoundException("Account: " + originAccountNumber + " not found."));
-        
-        if (!origin.getHolder().getId().equals(loggedUser.getId())) {
-            throw new AccessDeniedException("Você não tem permisão para usar esta conta.");
-        }
 
         if (!passwordEncoder.matches(transactionPassword, origin.getHolder().getTransactionPassword())) {
             throw new BusinessException("Invalid transaction password. Transfer denied. ");
@@ -119,22 +133,30 @@ public class AccountService {
     }
 
     /**
-     * Verifies if a given account number belongs to a specific user.
-     * This is a security method to ensure a user can only operate on their own accounts.
-     * The method completes successfully if ownership is valid.
-     *
-     * @param userId        The ID of the user claiming ownership.
-     * @param accountNumber The account number to be checked.
-     * @throws AccountNotFoundException       if the account number does not exist.
-     * @throws UnauthorizedOperationException if the account exists but does not belong to the specified user.
+     * Overloaded method for performing a transfer using a char array for the password.
+     * Securely converts the char array to a String, performs the operation, and clears the array.
      */
-    public void validateAccountOwnership(Long userId, String accountNumber) {
-        Account account = accountRepository.findByAccountNumberAndActiveTrue(accountNumber)
-                .orElseThrow(() -> new AccountNotFoundException("Account not found."));
-
-        if (!account.getHolder().getId().equals(userId)) {
-            throw new UnauthorizedOperationException("Origin account does not belong to the user.");
+    @Transactional
+    public void transfer(String originAccountNumber, String destinationAccountNumber, BigDecimal value, char[] transactionPassword) {
+        try {
+            transfer(originAccountNumber, destinationAccountNumber, value, new String(transactionPassword));
+        } finally {
+            if (transactionPassword != null) {
+                java.util.Arrays.fill(transactionPassword, '\0');
+            }
         }
+    }
+
+    public boolean isAccountOwner(Long accountId, Long userId) {
+        return accountRepository.findById(accountId)
+                .map(account -> account.isOwnedBy(userId))
+                .orElse(false);
+    }
+
+    public boolean isAccountNumberOwner(String accountNumber, Long userId) {
+        return accountRepository.findByAccountNumberAndActiveTrue(accountNumber)
+                .map(account -> account.isOwnedBy(userId))
+                .orElse(false);
     }
 
     /**
@@ -147,14 +169,19 @@ public class AccountService {
      * @throws BusinessException        if the account balance is greater than zero.
      */
     @Transactional
+    @PreAuthorize("@accountService.isAccountOwner(#accountId, principal.id)")
     public void softDeleteAccount(Long accountId) {
 
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new AccountNotFoundException("Account not found with ID: " + accountId));
 
+        if (!account.isActive()) {
+            throw new BusinessException("Account is already closed.");
+        }
+
         if (account.getBalance().compareTo(BigDecimal.ZERO) > 0) {
 
-            throw new BusinessException("Cannot delete account with a remaining balance." +
+            throw new BusinessException("Cannot delete account with a remaining balance. " +
                     "Please withdraw the funds first.");
         }
 

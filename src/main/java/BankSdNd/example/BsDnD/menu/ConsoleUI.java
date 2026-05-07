@@ -50,8 +50,9 @@ public class ConsoleUI {
                 1- Dados Pessoais
                 2- Exibir contas
                 3- Alterar Nome
-                4- Alterar Senha
-                5- Alterar Telefone
+                4- Alterar Senha de Login
+                5- Alterar Senha de Transação
+                6- Alterar Telefone
                 9- Voltar ao menu principal
                 0- Limpar tela
                 ===========================
@@ -151,7 +152,7 @@ public class ConsoleUI {
         System.out.println("\nConta criada com sucesso: " + account.getHolder().getName() + "\n");
     }
 
-    public void accountValidationShowError(String message) {
+    public void showAccountValidationError(String message) {
         System.out.println("\nErro: " + message + "\n");
     }
 
@@ -166,7 +167,7 @@ public class ConsoleUI {
         System.out.println("\nSolicitação de empréstimo cancelada.\n");
     }
 
-    public void showLoanSucess(Account updateAccount, BigDecimal requesAmount) {
+    public void showLoanSuccess(Account updateAccount, BigDecimal requesAmount) {
 
         String formattedAmount = CurrencyUtils.formatToBrazilianCurrency(requesAmount);
         String formattedNewBalance = CurrencyUtils.formatToBrazilianCurrency(updateAccount.getBalance());
@@ -175,7 +176,7 @@ public class ConsoleUI {
         System.out.println("Novo saldo na Conta " + updateAccount.getAccountNumber() + ": " + formattedNewBalance);
     }
 
-    public void showResquestLoanErro(String message) {
+    public void showLoanRequestError(String message) {
         System.out.println("\nNão foi possivel conceder o empréstimo: " + message + "\n");
     }
     // -----------------------------------------------
@@ -186,7 +187,7 @@ public class ConsoleUI {
         System.out.println("\nVoltando ao menu anterior.\n");
     }
 
-    public void showChoseOptions() {
+    public void showChooseOptions() {
         System.out.println("\nEscolha uma das opções acima.\n");
     }
 
@@ -198,15 +199,15 @@ public class ConsoleUI {
 
     // Tranfer v
 
-    public void showErroTransfer(String message) {
+    public void showTransferError(String message) {
         System.out.println("\nErro ao transferir: " + message + "\n");
     }
 
-    public void showTranferSuccessfully() {
+    public void showTransferSuccess() {
         System.out.println("\nTransferência realizada com sucesso.\n");
     }
 
-    public void showTranferErroValidationPassword() {
+    public void showTransferPasswordError() {
         System.out.println("\nConfirmação de senha Falhada. Tranferência cancelada.\n");
     }
 
@@ -219,7 +220,7 @@ public class ConsoleUI {
         System.out.println("\nConfirmação de senha falhou.Solicitação cancelada.\n");
     }
 
-    public void showConfimedPassword() {
+    public void showConfirmPassword() {
         System.out.println("\nPara continuar, por favor, confirme a sua senha.\n");
     }
 
@@ -256,7 +257,7 @@ public class ConsoleUI {
         System.out.println("\n===== Alteração de Nome e Sobrenome =====");
     }
 
-    public void showNameChangedSuccessFully() {
+    public void showNameChangeSuccess() {
         System.out.println("\nNome alterado com sucesso!");
     }
 
@@ -268,7 +269,7 @@ public class ConsoleUI {
         System.out.println("\n As novas senha não coincide. Tente novamente.");
     }
 
-    public void showProfilePasswordChangeSuccessfully() {
+    public void showProfilePasswordChangeSuccess() {
         System.out.println("\nSennha alterada com secesso!");
     }
 
@@ -276,7 +277,7 @@ public class ConsoleUI {
         System.out.println("Não foi possivel alterar a senha: " + message);
     }
 
-    public void showProfilePhoneChangedSuccessfully() {
+    public void showProfilePhoneChangeSuccess() {
         System.out.println("\nNúmero de telefone alterado com sucesso!");
     }
 
@@ -294,12 +295,42 @@ public class ConsoleUI {
         System.out.println("\n===== Encerrar Conta =====");
     }
 
-    public void showSucess(String message) {
+    public void showSuccess(String message) {
         System.out.println("" + message);
     }
 
     public void showError(String message) {
         System.out.println("" + message);
+    }
+
+    public void showAccessDeniedNoActiveAccount() {
+        System.out.println("\n[Ação Negada] Você ainda não possui uma conta bancária ativa!");
+        System.out.println("-> Por favor, use a opção '1- Criar conta' no menu principal primeiro.\n");
+    }
+
+    public void showInvalidOption() {
+        System.out.println("Opção inválida.");
+    }
+
+    public void showAccountClosedSuccess() {
+        System.out.println("Conta encerrada com sucesso!");
+    }
+
+    public void showAccountClosingError(String message) {
+        System.out.println("Erro ao encerrar conta: " + message);
+    }
+
+    public void showTransferPasswordMismatch() {
+        System.out.println("\nConfirmação de senha Falhada. Tranferência cancelada.\n");
+    }
+
+    public void showRetryOrCancelMenu() {
+        System.out.println("1- Tentar novamente");
+        System.out.println("2- Cancelar");
+    }
+
+    public void showOwnershipError() {
+        System.out.println("Você não é o titular desta conta ou ela não existe.");
     }
 
     public void print(String message) {

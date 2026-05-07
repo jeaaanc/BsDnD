@@ -15,9 +15,18 @@ public class UserUpdateDtos {
 
     public record password(
             @NotBlank(message = "A senha antiga é obrigatória") String oldPassword,
-            @NotBlank(message = "A senha nova é obrigatória") String newPassword
-//            @NotBlank(message = "Confirmação da senha é obrigatória") String confirmedPassword
+            @NotBlank(message = "A senha nova é obrigatória")
+            @jakarta.validation.constraints.Pattern(regexp = "^\\d{6}$", message = "A senha de login deve ter 6 números.")
+            String newPassword
     ) {}
+
+    public record TransactionPassword(
+            @NotBlank(message = "A senha de transação antiga é obrigatória") String oldTransactionPassword,
+            @NotBlank(message = "A senha de transação nova é obrigatória")
+            @jakarta.validation.constraints.Pattern(regexp = "^\\d{4}$", message = "A senha de transação deve ter 4 números.")
+            String newTransactionPassword
+    ) {}
+
     public record UserResponse (
             Long id,
             String name,

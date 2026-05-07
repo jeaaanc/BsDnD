@@ -48,13 +48,14 @@ public class UserProfileHandler {
                         return null;
                     }
                 }
-                case 5 -> user = handleChangePhoneNumber(user);
+                case 5 -> handleChangeTransactionPassword(user);
+                case 6 -> user = handleChangePhoneNumber(user);
                 case 9 -> {
                     ui.showMenuGoBack();
                     return user;
                 }
                 case 0 -> ui.clearScreen();
-                default -> ui.showChoseOptions();
+                default -> ui.showChooseOptions();
             }
         }
     }
@@ -74,8 +75,8 @@ public class UserProfileHandler {
         try {
             String newFirstName = InputUtils.readString(sc, "Digite o novo primeiro Nome: ");
             String newLastName = InputUtils.readString(sc, "Digite o novo sobrenome: ");
-            BankUser updatedUser = personService.updateName(user.getId(), newFirstName, newLastName, user);
-            ui.showNameChangedSuccessFully();
+            BankUser updatedUser = personService.updateName(user.getId(), newFirstName, newLastName);
+            ui.showNameChangeSuccess();
             return updatedUser;
         } catch (Exception e) {
             ui.showNameChangeError(e.getMessage());
@@ -100,8 +101,8 @@ public class UserProfileHandler {
             }
 
             String oldPasswordString = new String(rawOldPassword);
-            authService.updatePassword(user.getId(), oldPasswordString, newPassword, user);
-            ui.showProfilePasswordChangeSuccessfully();
+            authService.updatePassword(user.getId(), oldPasswordString, newPassword);
+            ui.showProfilePasswordChangeSuccess();
             return true;
         } catch (Exception e) {
             ui.showProfilePasswordUpdateError(e.getMessage());
@@ -115,12 +116,75 @@ public class UserProfileHandler {
         ui.showChangePhonenumberScreen();
         try {
             String newPhoneNumber = InputUtils.readString(sc, "Digite o novo número de telefone: ");
-            BankUser updatedUser = personService.updatePhoneNumber(user.getId(), newPhoneNumber, user);
-            ui.showProfilePhoneChangedSuccessfully();
+            BankUser updatedUser = personService.updatePhoneNumber(user.getId(), newPhoneNumber);
+            ui.showProfilePhoneChangeSuccess();
             return updatedUser;
         } catch (Exception e) {
             ui.showProfilePhoneUpdateError(e.getMessage());
             return user;
+        }
+    }
+
+    private void handleChangeTransactionPassword(BankUser user) {
+        ui.print("\n===== Alteração de Senha de Transação =====");
+        char[] rawOldPassword = null;
+        try {
+            rawOldPassword = PasswordUtils.catchPassword("Digite sua senha de transação ATUAL: ");
+            if (rawOldPassword == null) {
+                ui.showPasswordNull();
+                return;
+            }
+
+            String newPassword = askForNewConfirmedTransactionPassword();
+            if (newPassword == null) {
+                ui.showPasswordNull();
+                return;
+            }
+
+            String oldPasswordString = new String(rawOldPassword);
+            authService.updateTransactionPassword(user.getId(), oldPasswordString, newPassword);
+            ui.print("\nSenha de transação alterada com sucesso!");
+        } catch (Exception e) {
+            ui.print("Não foi possível alterar a senha de transação: " + e.getMessage());
+        } finally {
+            if (rawOldPassword != null) Arrays.fill(rawOldPassword, '\0');
+        }
+    }
+
+    private String askForNewConfirmedTransactionPassword() {
+        char[] newPassword = null;
+        char[] newPasswordConfirmation = null;
+        try {
+            while (true) {
+                newPassword = PasswordUtils.catchPassword("Digite sua NOVA senha de transação: ");
+                if (newPassword == null) return null;
+
+                newPasswordConfirmation = PasswordUtils.catchPassword("Confirme sua NOVA senha de transação: ");
+                if (newPasswordConfirmation == null) {
+                    Arrays.fill(newPassword, '\0');
+                    return null;
+                }
+
+                if (Arrays.equals(newPassword, newPasswordConfirmation)) {
+                    String finalPassword = new String(newPassword);
+                    Arrays.fill(newPassword, '\0');
+                    Arrays.fill(newPasswordConfirmation, '\0');
+                    return finalPassword;
+                }
+
+                ui.showProfilePasswordMismatch();
+                Arrays.fill(newPassword, '\0');
+                Arrays.fill(newPasswordConfirmation, '\0');
+
+                int option = InputUtils.readInt(sc, "1- Tentar Novamente\n2- Cancelar\nEscolha uma opção:");
+                if (option == 2) {
+                    return null;
+                }
+            }
+        } catch (Exception e) {
+            if (newPassword != null) Arrays.fill(newPassword, '\0');
+            if (newPasswordConfirmation != null) Arrays.fill(newPasswordConfirmation, '\0');
+            throw e;
         }
     }
 

@@ -2,12 +2,10 @@ package BankSdNd.example.BsDnD.controller.cli;
 
 import BankSdNd.example.BsDnD.domain.Account;
 import BankSdNd.example.BsDnD.domain.BankUser;
-import BankSdNd.example.BsDnD.exception.business.AccountNotFoundException;
 import BankSdNd.example.BsDnD.exception.business.BusinessException;
 import BankSdNd.example.BsDnD.menu.ConsoleUI;
 import BankSdNd.example.BsDnD.service.AccountService;
-import BankSdNd.example.BsDnD.util.InputUtils;
-import BankSdNd.example.BsDnD.util.PasswordUtils;
+import BankSdNd.example.BsDnD.util.AccountInputCollector;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -19,32 +17,34 @@ import java.util.Scanner;
 public class AccountOperationHandler {
 
     private final AccountService accountService;
-    private final Scanner sc;
+    private final AccountInputCollector inputCollector;
     private final ConsoleUI ui;
 
     public AccountOperationHandler(AccountService accountService, Scanner sc, ConsoleUI ui) {
         this.accountService = accountService;
-        this.sc = sc;
         this.ui = ui;
+        this.inputCollector = new AccountInputCollector(sc, ui);
     }
 
     public void registerUserAccount(BankUser currentUser) {
         ui.showCreateAccount();
 
-        String cpf = InputUtils.readString(sc, "Seu CPF: ");
+        String cpf = inputCollector.collectCpf();
 
-        String isPasswordConfirmed = captureTransactionPassword();
-        if (isPasswordConfirmed == null) {
+        char[] capturedPassword = inputCollector.captureTransactionPassword();
+        if (capturedPassword == null) {
             ui.accountShowPasswordValidation();
             return;
         }
 
         try {
-            Account createdAccount = accountService.accountCreate(cpf);
+            Account createdAccount = accountService.createAccount(cpf, capturedPassword);
             ui.accountCreatedSuccessfully(createdAccount);
 
         } catch (Exception e) {
-            ui.accountValidationShowError(e.getMessage());
+            ui.showAccountValidationError(e.getMessage());
+        } finally {
+            Arrays.fill(capturedPassword, '\0');
         }
     }
 
@@ -64,21 +64,25 @@ public class AccountOperationHandler {
 
         ui.showTransferMenu();
 
-        String password = captureTransactionPassword();
+        char[] password = inputCollector.captureTransactionPassword();
         if (password == null) {
-            ui.showTranferErroValidationPassword();
+            ui.showTransferPasswordError();
             return;
         }
 
-        String accountOrigem = readAccountOrigem(currentUser);
-        String accountDestination = readContaDestino();
-        BigDecimal valor = InputUtils.readBigDecimal(sc, "Digite o valor da transferência: ");
-
         try {
-            accountService.transfer(accountOrigem, accountDestination, valor, password);
-            ui.showTranferSuccessfully();
+            String originAccount = inputCollector.collectOriginAccount(accountService, currentUser);
+            if (originAccount == null) return;
+
+            String destinationAccount = inputCollector.collectDestinationAccount();
+            BigDecimal valor = inputCollector.collectTransferAmount();
+
+            accountService.transfer(originAccount, destinationAccount, valor, password);
+            ui.showTransferSuccess();
         } catch (BusinessException | IllegalArgumentException e) {
-            ui.showErroTransfer(e.getMessage());
+            ui.showTransferError(e.getMessage());
+        } finally {
+            Arrays.fill(password, '\0');
         }
     }
 
@@ -89,69 +93,31 @@ public class AccountOperationHandler {
         ui.showDeleteAccountMenu();
         balance(currentUser);
 
-        int accountIndex = InputUtils.readInt(sc, "Digite o número da conta da lista acima" +
-                " que deseja encerrar (0 para cancelar): ");
+        int accountIndex = inputCollector.collectAccountIndexForDeletion();
         if (accountIndex == 0) return;
 
         try {
             List<Account> accounts = accountService.searchClientAccount(currentUser.getCpf());
             if (accountIndex < 1 || accountIndex > accounts.size()) {
-                ui.showError("Opção inválida.");
+                ui.showInvalidOption();
                 return;
             }
             Long idToDelete = accounts.get(accountIndex - 1).getId();
 
             accountService.softDeleteAccount(idToDelete);
-            ui.showSucess("Conta encerrada com sucesso!");
+            ui.showAccountClosedSuccess();
         } catch (Exception e) {
-            ui.showError("Erro ao encerrar conta: " + e.getMessage());
+            ui.showAccountClosingError(e.getMessage());
         }
     }
 
     public boolean requireActiveAccount(BankUser currentUser) {
-        try {
-            List<Account> accounts = accountService.searchClientAccount(currentUser.getCpf());
+        List<Account> accounts = accountService.searchClientAccount(currentUser.getCpf());
 
-            if (accounts == null || accounts.isEmpty()) {
-                ui.showError("\n[Ação Negada] Você ainda não possui uma conta bancária ativa!");
-                ui.print("-> Por favor, use a opção '1- Criar conta' no menu principal primeiro.\n");
-                return false;
-            }
-            return true;
-            // ! dar uma olhada depois em uma exception melhor !
-        } catch (BusinessException e) {
-            ui.showError("\n[Ação Negada] Você ainda não possui uma conta bancária ativa!");
-            ui.print("-> Por favor, use a opção '1- Criar conta' no menu principal primeiro.\n");
+        if (accounts == null || accounts.isEmpty()) {
+            ui.showAccessDeniedNoActiveAccount();
             return false;
         }
-    }
-
-    private String captureTransactionPassword() {
-        char[] rawPassword = null;
-        try {
-            ui.showConfimedPassword();
-            rawPassword = PasswordUtils.catchPassword("Senha de transação: ");
-
-            if (rawPassword == null || rawPassword.length == 0) {
-                ui.showPasswordNull();
-                return null;
-            }
-
-            return new String(rawPassword);
-        } finally {
-            if (rawPassword != null) {
-                Arrays.fill(rawPassword, '\0');
-            }
-        }
-    }
-
-    private String readAccountOrigem(BankUser currentUser) {
-        String typedAccount = InputUtils.readString(sc, "Digite o número da sua conta(origem):");
-        accountService.validateAccountOwnership(currentUser.getId(), typedAccount);
-        return typedAccount;
-    }
-
-    private String readContaDestino() {
-        return InputUtils.readString(sc, "Digite o número da conta de destino: ");
+        return true;
     }
 }
