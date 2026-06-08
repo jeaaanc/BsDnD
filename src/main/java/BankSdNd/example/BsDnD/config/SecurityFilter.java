@@ -1,7 +1,7 @@
 package BankSdNd.example.BsDnD.config;
 
-import BankSdNd.example.BsDnD.repository.BankUserRepository;
-import BankSdNd.example.BsDnD.service.TokenService;
+import BankSdNd.example.BsDnD.core.port.out.BankUserRepositoryPort;
+import BankSdNd.example.BsDnD.adapter.out.security.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,9 +17,9 @@ import java.io.IOException;
 public class SecurityFilter extends OncePerRequestFilter {
 
     private final TokenService tokenService;
-    private final BankUserRepository userRepository;
+    private final BankUserRepositoryPort userRepository;
 
-    public SecurityFilter(TokenService tokenService, BankUserRepository userRepository) {
+    public SecurityFilter(TokenService tokenService, BankUserRepositoryPort userRepository) {
         this.tokenService = tokenService;
         this.userRepository = userRepository;
     }
@@ -32,10 +32,11 @@ public class SecurityFilter extends OncePerRequestFilter {
         if (token != null) {
 
             var login = tokenService.validateToken(token);
-            if (!login.isEmpty()) {
+            if (login != null) {
 
                 userRepository.findByCpf(login).ifPresent(user -> {
-                    var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                    var userDetails = new UserDetailsAdapter(user);
+                    var authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 });
