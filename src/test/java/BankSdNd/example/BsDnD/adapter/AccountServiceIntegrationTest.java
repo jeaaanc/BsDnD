@@ -1,12 +1,13 @@
-package BankSdNd.example.BsDnD.core.application;
+package BankSdNd.example.BsDnD.adapter;
 
 import BankSdNd.example.BsDnD.config.UserDetailsAdapter;
 import BankSdNd.example.BsDnD.core.domain.model.Account;
 import BankSdNd.example.BsDnD.core.domain.model.BankUser;
-import BankSdNd.example.BsDnD.core.domain.exception.InsufficientBalanceException;
+import BankSdNd.example.BsDnD.core.domain.exception.*;
 import BankSdNd.example.BsDnD.core.port.out.AccountRepositoryPort;
 import BankSdNd.example.BsDnD.core.port.out.BankUserRepositoryPort;
 import BankSdNd.example.BsDnD.core.port.out.PasswordEncoderPort;
+import BankSdNd.example.BsDnD.core.application.AccountService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -121,11 +122,11 @@ class AccountServiceIntegrationTest {
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         // Then
-        Exception exception = assertThrows(Exception.class, () -> {
+        BusinessException exception = assertThrows(BusinessException.class, () -> {
             accountService.transfer("10001", "20001", new BigDecimal("100"), "wrong".toCharArray());
         });
         
-        assertTrue(exception.getMessage().contains("Invalid transaction password"));
+        assertTrue(exception.getMessage().contains("Invalid transaction password") || exception.getMessageKey().equals("error.password_incorrect"));
     }
 
     @Test

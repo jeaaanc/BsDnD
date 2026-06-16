@@ -52,16 +52,16 @@ public class AccountService implements CreateAccountUseCase, GetAccountUseCase, 
      */
     public Account createAccount(String cpf, String transactionPassword) {
         BankUser user = bankUserRepository.findByCpf(cpf)
-                .orElseThrow(() -> new UserNotFoundException("User with CPF " + cpf + " not found"));
+                .orElseThrow(() -> new UserNotFoundException("error.user_not_found"));
 
         if (!passwordEncoder.matches(transactionPassword, user.getTransactionPassword())) {
-            throw new BusinessException("Invalid transaction password. Account creation denied.");
+            throw new BusinessException("error.password_incorrect");
         }
 
 
         List<Account> existingAccounts = accountRepository.findAllByCpf(cpf);
         if (existingAccounts.size() >= 3) {
-            throw new BusinessException("User has reached the maximum limit of 3 accounts.");
+            throw new BusinessException("error.account_limit");
         }
 
         String accountNumber = accountNumberGenerator.generateUniqueAccountNumber();
@@ -109,18 +109,18 @@ public class AccountService implements CreateAccountUseCase, GetAccountUseCase, 
     public void transfer(String originAccountNumber, String destinationAccountNumber, BigDecimal value, String transactionPassword) {
 
         if (value == null || value.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new InsufficientBalanceException("The tranfer amount must be greater than 0.");
+            throw new ValidationException("error.amount_positive");
         }
 
         Account origin = accountRepository.findByAccountNumberAndActiveTrue(originAccountNumber)
-                .orElseThrow(() -> new AccountNotFoundException("Account: " + originAccountNumber + " not found."));
+                .orElseThrow(() -> new AccountNotFoundException("error.account_not_found"));
 
         if (!passwordEncoder.matches(transactionPassword, origin.getHolder().getTransactionPassword())) {
-            throw new BusinessException("Invalid transaction password. Transfer denied. ");
+            throw new BusinessException("error.password_incorrect");
         }
 
         Account destination = accountRepository.findByAccountNumberAndActiveTrue(destinationAccountNumber)
-                .orElseThrow(() -> new AccountNotFoundException("Destination " + destinationAccountNumber + " not found."));
+                .orElseThrow(() -> new AccountNotFoundException("error.account_not_found"));
 
 
         origin.transferTo(destination, value);
@@ -167,16 +167,15 @@ public class AccountService implements CreateAccountUseCase, GetAccountUseCase, 
     public void softDeleteAccount(Long accountId) {
 
         Account account = accountRepository.findById(accountId)
-                .orElseThrow(() -> new AccountNotFoundException("Account not found with ID: " + accountId));
+                .orElseThrow(() -> new AccountNotFoundException("error.account_not_found"));
 
         if (!account.isActive()) {
-            throw new BusinessException("Account is already closed.");
+            throw new BusinessException("error.account_closed");
         }
 
         if (account.getBalance().compareTo(BigDecimal.ZERO) > 0) {
 
-            throw new BusinessException("Cannot delete account with a remaining balance. " +
-                    "Please withdraw the funds first.");
+            throw new BusinessException("error.account_balance_remaining");
         }
 
         account.setActive(false);
