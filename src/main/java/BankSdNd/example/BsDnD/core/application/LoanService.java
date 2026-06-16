@@ -2,7 +2,7 @@ package BankSdNd.example.BsDnD.core.application;
 
 import BankSdNd.example.BsDnD.core.domain.model.Account;
 import BankSdNd.example.BsDnD.core.domain.model.BankUser;
-import BankSdNd.example.BsDnD.core.domain.exception.LoanLimitExceededException;
+import BankSdNd.example.BsDnD.core.domain.exception.*;
 import BankSdNd.example.BsDnD.core.domain.service.FinancialCalculator;
 import BankSdNd.example.BsDnD.core.port.in.RequestLoanUseCase;
 import BankSdNd.example.BsDnD.core.port.out.PasswordEncoderPort;
@@ -55,25 +55,26 @@ public class LoanService implements RequestLoanUseCase {
      * @param transactionPassword The 4-digit transactional password of the account holder.
      * @return The {@code Account} that received the loan deposit, with its updated balance.
      * @throws LoanLimitExceededException if the requested amount is greater than the user's available limit.
-     * @throws IllegalArgumentException if the requested amount is not positive, or if the user has no accounts to receive the deposit.
+     * @throws ValidationException if the requested amount is not positive.
+     * @throws BusinessException if the user has no accounts to receive the deposit or if the password is wrong.
      */
     public Account grantLoan(BankUser user, BigDecimal requestedAmount, char[] transactionPassword) {
 
         if (!passwordEncoder.matches(CharBuffer.wrap(transactionPassword), user.getTransactionPassword())) {
-            throw new IllegalArgumentException("Invalid transaction password. Loan denied.");
+            throw new BusinessException("error.password_incorrect");
         }
 
         BigDecimal limit = calculateLoanLimit(user);
         if (requestedAmount.compareTo(limit) > 0) {
-            throw new LoanLimitExceededException("The request amount exceeds your loan limit of R$ " + limit);
+            throw new LoanLimitExceededException("error.loan_limit_exceeded");
         }
         if (requestedAmount.compareTo(BigDecimal.ZERO) <= 0){
-            throw new IllegalArgumentException("The loan amount must be positive.");
+            throw new ValidationException("error.amount_positive");
         }
 
         Account primaryAccount = accountService.searchClientAccount(user.getCpf()).stream()
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("The customer does not have an account to receive the loan."));
+                .orElseThrow(() -> new BusinessException("error.account_not_found"));
 
         primaryAccount.deposit(requestedAmount);
         return primaryAccount;

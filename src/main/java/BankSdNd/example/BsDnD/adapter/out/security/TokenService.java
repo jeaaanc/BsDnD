@@ -1,6 +1,8 @@
 package BankSdNd.example.BsDnD.adapter.out.security;
 
 import BankSdNd.example.BsDnD.core.domain.model.BankUser;
+import BankSdNd.example.BsDnD.core.domain.exception.*;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,7 +22,9 @@ public class TokenService {
     private String secret;
 
     private SecretKey getSigningKey() {
-
+        if (secret == null || secret.isBlank()) {
+            throw new TokenGenerationException("error.token_generation", null);
+        }
         byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
         return Keys.hmacShaKeyFor(keyBytes);
     }
@@ -35,7 +39,7 @@ public class TokenService {
                     .signWith(getSigningKey())
                     .compact();
         } catch (Exception e) {
-            throw new RuntimeException("Erro ao gerar token", e);
+            throw new TokenGenerationException("error.token_generation", e);
         }
     }
 
@@ -48,8 +52,10 @@ public class TokenService {
                     .getPayload()
                     .getSubject();
 
+        } catch (JwtException e) {
+            throw new InvalidTokenException("error.token_invalid", e);
         } catch (Exception e) {
-            return null;
+            throw new InvalidTokenException("error.token_invalid", e);
         }
     }
 

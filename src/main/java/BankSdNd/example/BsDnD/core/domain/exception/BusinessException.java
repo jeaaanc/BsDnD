@@ -1,11 +1,26 @@
 package BankSdNd.example.BsDnD.core.domain.exception;
 
 public class BusinessException extends RuntimeException {
-    public BusinessException(String message) {
-        super(message);
+    private final String messageKey;
+    private final Object[] args;
+
+    public BusinessException(String messageKey) {
+        super(messageKey);
+        this.messageKey = messageKey;
+        this.args = null;
     }
 
-    public BusinessException(String message, Throwable cause) {
-        super(message, cause);
+    public BusinessException(String messageKey, Object... args) {
+        super(messageKey);
+        this.messageKey = messageKey;
+        this.args = args;
+    }
+
+    public String getMessageKey() {
+        return messageKey;
+    }
+
+    public Object[] getArgs() {
+        return args;
     }
 }

@@ -1,4 +1,4 @@
-# BsDnD - Sistema Bancário Híbrido (CLI e API REST)
+# BsDnD - Sistema Bancário Híbrido (API REST e CLI)
 
 ## Sobre o Projeto
 

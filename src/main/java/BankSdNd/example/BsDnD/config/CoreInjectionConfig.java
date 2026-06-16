@@ -22,6 +22,11 @@ public class CoreInjectionConfig {
     }
 
     @Bean
+    public AccountNumberGenerator accountNumberGenerator(AccountRepositoryPort accountRepository) {
+        return new AccountNumberGenerator(accountRepository);
+    }
+
+    @Bean
     public AccountService accountService(AccountRepositoryPort accountRepository,
                                          BankUserRepositoryPort bankUserRepository,
                                          AccountNumberGenerator accountNumberGenerator,

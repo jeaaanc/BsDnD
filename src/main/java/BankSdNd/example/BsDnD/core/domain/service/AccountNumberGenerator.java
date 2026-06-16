@@ -1,20 +1,17 @@
 package BankSdNd.example.BsDnD.core.domain.service;
 
 import BankSdNd.example.BsDnD.core.port.out.AccountRepositoryPort;
-import org.springframework.stereotype.Component;
 
 import java.security.SecureRandom;
 
 
 /**
- * A Domain Service (implemented as a Spring component for ease of injection)
- * responsible for generating unique bank account numbers.
+ * A Domain Service responsible for generating unique bank account numbers.
  *
  * This class creates an 8-digit base number and appends a 1-digit check digit
  * based on the "Módulo 11" algorithm. It ensures the final, generated number
  * is unique by checking against the {@code AccountRepositoryPort}.
  */
-@Component
 public class AccountNumberGenerator {
 
     private final AccountRepositoryPort accountRepository;

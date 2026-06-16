@@ -1,6 +1,7 @@
 package BankSdNd.example.BsDnD.config;
 
 import BankSdNd.example.BsDnD.core.port.out.BankUserRepositoryPort;
+import BankSdNd.example.BsDnD.core.domain.exception.InvalidTokenException;
 import BankSdNd.example.BsDnD.adapter.out.security.TokenService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -30,16 +31,17 @@ public class SecurityFilter extends OncePerRequestFilter {
 
         var token = this.recoverToken(request);
         if (token != null) {
-
-            var login = tokenService.validateToken(token);
-            if (login != null) {
-
+            try {
+                var login = tokenService.validateToken(token);
                 userRepository.findByCpf(login).ifPresent(user -> {
                     var userDetails = new UserDetailsAdapter(user);
                     var authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 });
+            } catch (InvalidTokenException e) {
+                // If token is invalid, we just don't authenticate the user
+                SecurityContextHolder.clearContext();
             }
         }
         filterChain.doFilter(request, response);
