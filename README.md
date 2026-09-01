@@ -1,14 +1,28 @@
-# BsDnD - Sistema Bancário Híbrido (API REST e CLI)
+# BsDnD - Sistema Bancário
 
 ## Sobre o Projeto
 
-O BsDnD é um ecossistema bancário simulado desenvolvido em Java e Spring Boot, concebido como um **projeto de evolução contínua**. O sistema demonstra a transição de uma aplicação de linha de comando (CLI) para um ambiente híbrido com API REST completa.
+O BsDnD é um ecossistema bancário desenvolvido em Java e Spring Boot, concebido como
+um **projeto de evolução contínua para estudo e aprofundamento técnico**.
 
-O foco central deste repositório é a aplicação de princípios de engenharia de software de nível corporativo, com ênfase em segurança, escalabilidade e manutenibilidade através de padrões de design modernos.
+O sistema explora diferentes formas de interação, incluindo uma interface de linha de 
+comando (**ex: CLI**). A construção de uma CLI foi intencionalmente desenvolvida aqui como ferramenta
+de **estudo**, para consolidar o entendimento de lógicas de fluxo, injeção de dependências
+e interações complexas. O projeto também tem um ambiente com uma API REST
+completa, refletindo práticas reais.
+
+O foco central deste repositório é a aplicação de princípios de engenharia
+de software de nível corporativo, com ênfase em segurança, escalabilidade e manutenibilidade
+através de padrões de design modernos e de uma Arquitetura Hexagonal.
 
 ---
 
 ## Funcionalidades Principais
+
+### Interface API REST
+- Endpoints RESTful: Suporte a operações de usuários, contas e transferências via HTTP.
+- Segurança JWT: Proteção de rotas utilizando JSON Web Tokens.
+- Tratamento Global de Exceções: Respostas padronizadas para erros de negócio e técnicos.
 
 ### Interface de Linha de Comando (CLI)
 - Menu Interativo: Fluxo completo de navegação via terminal.
@@ -17,16 +31,26 @@ O foco central deste repositório é a aplicação de princípios de engenharia 
 - Operações Transacionais: Transferências entre contas com validação de senha de transação.
 - Sistema de Empréstimos: Cálculo dinâmico de limites baseado em renda e bônus.
 
-### Interface API REST
-- Endpoints RESTful: Suporte a operações de usuários, contas e transferências via HTTP.
-- Segurança JWT: Proteção de rotas utilizando JSON Web Tokens.
-- Tratamento Global de Exceções: Respostas padronizadas para erros de negócio e técnicos.
 
 ---
 
-## Arquitetura e Princípios SOLID
+## Internacionalização (i18n)
 
-O projeto foi estruturado para garantir extensibilidade e baixo acoplamento, aplicando rigorosamente os princípios **SOLID** (SRP, OCP, LSP, ISP e DIP) em toda a sua arquitetura em camadas. Esta abordagem facilita a manutenção e a escalabilidade, permitindo que o sistema cresça de forma modular e segura, garantindo que novas funcionalidades possam ser adicionadas com impacto mínimo no código existente.
+O projeto é construído com suporte a múltiplos idiomas. Os textos e retornos do sistema utilizam **Resource Bundles** (`messages.properties`), centralizando as mensagens e facilitando a tradução ou alteração de diálogos sem a necessidade de modificar o código-fonte.
+
+---
+
+## Arquitetura Hexagonal e Princípios SOLID
+
+O projeto adota a Arquitetura Hexagonal combinada aos princípios SOLID para isolar totalmente
+as regras de negócio dos detalhes de infraestrutura. Toda comunicação com o mundo externo
+ocorre estritamente via portas e adaptadores.
+
+Como o sistema opera tanto com uma Interface de Linha de Comando (CLI) quanto com uma API REST
+(Web), o projeto tira proveito da sobrecarga de métodos (overload). Isso permite que a mesma
+lógica central do domínio receba e processe de forma flexível as diferentes assinaturas e
+parâmetros vindos de cada interface. Essa estrutura garante baixo acoplamento, alta
+extensibilidade e impacto mínimo ao acoplar novas funcionalidades.
 
 ---
 
@@ -73,16 +97,16 @@ Endpoints Principais:
    DB_PASSWORD=sua_senha
 
 ### Execução Local
-- Para rodar a API (Modo Servidor): mvn spring-boot:run
-- Para rodar a CLI (Modo Interativo): java -jar target/BsDnD-0.0.1-SNAPSHOT.jar --cli
-- Para rodar via Docker: docker-compose up --build
+- Para rodar a API (Modo Servidor): `mvn spring-boot:run`
+- Para rodar a CLI (Modo Interativo): `java -jar target/BsDnD-0.0.1-SNAPSHOT.jar --cli`
+- Para rodar via Docker: `docker-compose up --build`
 
 ---
 
 ## Testes Automatizados
 
 O projeto utiliza JUnit 5 para testes de integração. A suíte de testes utiliza o perfil "test" com um banco de dados H2 em memória, garantindo isolamento total do ambiente de desenvolvimento.
-Comando para execução: mvn test
+Comando para execução: `mvn test`
 
 ---
 

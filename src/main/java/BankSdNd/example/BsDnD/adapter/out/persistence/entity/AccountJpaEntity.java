@@ -28,6 +28,7 @@ public class AccountJpaEntity {
     @JoinColumn(name = "user_id")
     private BankUserJpaEntity holder;
 
+    @Builder.Default
     @Column(name = "active", nullable = false)
     private boolean active = true;
 }

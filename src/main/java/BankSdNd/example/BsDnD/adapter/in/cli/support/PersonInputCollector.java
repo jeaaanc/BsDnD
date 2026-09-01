@@ -143,10 +143,11 @@ public class PersonInputCollector {
 
     private String collectCpf(Scanner scanner) {
         String cpf;
+
         do {
             ui.print(ui.getMessage("prompt.cancel_hint"));
-
             cpf = inputUtils.readString(scanner, ui.getMessage("prompt.cpf"));
+
             if (cpf.trim().equals("0")) {
                 return null;
             }
