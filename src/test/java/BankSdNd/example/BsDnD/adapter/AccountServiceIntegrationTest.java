@@ -46,8 +46,19 @@ class AccountServiceIntegrationTest {
 
     private BankUser user1;
     private BankUser user2;
-    private Account account1;
-    private Account account2;
+
+    private final String USER1_CPF = "11111111111";
+    private final String USER2_CPF = "22222222222";
+    private final String NEW_USER_CPF = "33333333333";
+
+    private final String ACCOUNT1_NUM = "10001";
+    private final String ACCOUNT2_NUM = "20001";
+
+    private final String DEFAULT_PASSWORD = "123456";
+    private final String TX_PASSWORD_USER1 = "1234";
+    private final String TX_PASSWORD_USER2 = "5678";
+    private final String WRONG_TX_PASSWORD = "wrong";
+
 
     @BeforeEach
     void setUp() {
@@ -56,27 +67,27 @@ class AccountServiceIntegrationTest {
 
         user1 = BankUser.builder()
                 .name("User 1")
-                .cpf("11111111111")
+                .cpf(USER1_CPF)
                 .income(new BigDecimal("2000"))
-                .password(passwordEncoder.encode("password"))
-                .transactionPassword(passwordEncoder.encode("1234"))
+                .password(passwordEncoder.encode(DEFAULT_PASSWORD))
+                .transactionPassword(passwordEncoder.encode(TX_PASSWORD_USER1))
                 .build();
 
         user2 = BankUser.builder()
                 .name("User 2")
-                .cpf("22222222222")
+                .cpf(USER2_CPF)
                 .income(new BigDecimal("3000"))
-                .password(passwordEncoder.encode("password"))
-                .transactionPassword(passwordEncoder.encode("5678"))
+                .password(passwordEncoder.encode(DEFAULT_PASSWORD))
+                .transactionPassword(passwordEncoder.encode(TX_PASSWORD_USER2))
                 .build();
 
         user1 = bankUserRepository.save(user1);
         user2 = bankUserRepository.save(user2);
 
-        account1 = new Account("10001", user1);
+        Account account1 = new Account(ACCOUNT1_NUM, user1);
         account1.deposit(new BigDecimal("1000"));
-        
-        account2 = new Account("20001", user2);
+
+        Account account2 = new Account(ACCOUNT2_NUM, user2);
         account2.deposit(new BigDecimal("500"));
 
         accountRepository.save(account1);
@@ -86,16 +97,14 @@ class AccountServiceIntegrationTest {
     @Test
     @DisplayName("Should transfer money between accounts correctly")
     void transferSuccessfully() {
-        // Authenticate as user1
-        var auth = new UsernamePasswordAuthenticationToken(new UserDetailsAdapter(user1), null, new UserDetailsAdapter(user1).getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(auth);
 
-        // When
-        accountService.transfer("10001", "20001", new BigDecimal("300"), "1234".toCharArray());
+        authenticateAs(user1);
+        BigDecimal tranferAmount = new BigDecimal("300");
 
-        // Then
-        Account updatedOrigin = accountRepository.findByAccountNumberAndActiveTrue("10001").get();
-        Account updatedDest = accountRepository.findByAccountNumberAndActiveTrue("20001").get();
+        accountService.transfer(ACCOUNT1_NUM, ACCOUNT2_NUM, tranferAmount, TX_PASSWORD_USER1.toCharArray());
+
+        Account updatedOrigin = accountRepository.findByAccountNumberAndActiveTrue(ACCOUNT1_NUM).get();
+        Account updatedDest = accountRepository.findByAccountNumberAndActiveTrue(ACCOUNT2_NUM).get();
 
         assertEquals(0, new BigDecimal("700.00").compareTo(updatedOrigin.getBalance()), "Origin balance mismatch");
         assertEquals(0, new BigDecimal("800.00").compareTo(updatedDest.getBalance()), "Destination balance mismatch");
@@ -104,52 +113,54 @@ class AccountServiceIntegrationTest {
     @Test
     @DisplayName("Should throw exception when balance is insufficient")
     void transferWithInsufficientBalance() {
-        // Authenticate as user1
-        var auth = new UsernamePasswordAuthenticationToken(new UserDetailsAdapter(user1), null, new UserDetailsAdapter(user1).getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(auth);
 
-        // Then
+        authenticateAs(user1);
+        BigDecimal transferAmount = new BigDecimal("1500");
+
         assertThrows(InsufficientBalanceException.class, () -> {
-            accountService.transfer("10001", "20001", new BigDecimal("1500"), "1234".toCharArray());
+            accountService.transfer(ACCOUNT1_NUM, ACCOUNT2_NUM, transferAmount, TX_PASSWORD_USER1.toCharArray());
         });
     }
 
+    // Arrumar exception
     @Test
     @DisplayName("Should throw exception when transaction password is wrong")
     void transferWithWrongPassword() {
-        // Authenticate as user1
-        var auth = new UsernamePasswordAuthenticationToken(new UserDetailsAdapter(user1), null, new UserDetailsAdapter(user1).getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(auth);
 
-        // Then
+        authenticateAs(user1);
+        BigDecimal transferAmount = new BigDecimal("100");
+
         BusinessException exception = assertThrows(BusinessException.class, () -> {
-            accountService.transfer("10001", "20001", new BigDecimal("100"), "wrong".toCharArray());
+            accountService.transfer(ACCOUNT1_NUM, ACCOUNT2_NUM,transferAmount, WRONG_TX_PASSWORD.toCharArray());
         });
-        
-        assertTrue(exception.getMessage().contains("Invalid transaction password") || exception.getMessageKey().equals("error.password_incorrect"));
+
+        assertTrue(exception.getMessage().contains("Invalid transaction password") ||
+                exception.getMessage().equals("error.password_incorrect"));
     }
 
     @Test
     @DisplayName("Should create a new account with zero balance")
     void accountCreateWithZeroBalance() {
-        // Given
-        // We need a user without an account for this test because of the new rule
+
         BankUser newUser = BankUser.builder()
                 .name("New User")
-                .cpf("33333333333")
-                .password(passwordEncoder.encode("password"))
-                .transactionPassword(passwordEncoder.encode("1234"))
+                .cpf(NEW_USER_CPF)
+                .password(passwordEncoder.encode(DEFAULT_PASSWORD))
+                .transactionPassword(passwordEncoder.encode(TX_PASSWORD_USER1))
                 .build();
         newUser = bankUserRepository.save(newUser);
+        authenticateAs(newUser);
 
-        var auth = new UsernamePasswordAuthenticationToken(new UserDetailsAdapter(newUser), null, new UserDetailsAdapter(newUser).getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(auth);
+        Account account = accountService.createAccount(NEW_USER_CPF, TX_PASSWORD_USER1.toCharArray());
 
-        // When
-        Account account = accountService.createAccount("33333333333", "1234".toCharArray());
-
-        // Then
         assertNotNull(account);
         assertEquals(0, BigDecimal.ZERO.compareTo(account.getBalance()));
+    }
+
+    private void authenticateAs(BankUser user) {
+
+        UserDetailsAdapter userDetailsAdapter = new UserDetailsAdapter(user);
+        var auth = new UsernamePasswordAuthenticationToken(userDetailsAdapter, null, userDetailsAdapter.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(auth);
     }
 }

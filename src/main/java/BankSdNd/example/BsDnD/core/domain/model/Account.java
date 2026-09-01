@@ -1,13 +1,11 @@
 package BankSdNd.example.BsDnD.core.domain.model;
 
 import BankSdNd.example.BsDnD.core.domain.exception.InsufficientBalanceException;
+import BankSdNd.example.BsDnD.core.domain.exception.InvalidDepositAmountException;
 
 import java.math.BigDecimal;
 
-/**
- * Represents a bank account in the system.
- * This is a pure domain model, free of infrastructure or framework dependencies.
- */
+
 public class Account {
 
     private Long id;
@@ -30,14 +28,14 @@ public class Account {
 
     public void deposit(BigDecimal amount) {
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0){
-            throw new IllegalArgumentException("Deposit must be greater than 0");
+            throw new InvalidDepositAmountException("Deposit must be greater than 0");
         }
         this.balance = this.balance.add(amount);
     }
 
     public void withdraw(BigDecimal amount) {
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0){
-            throw new IllegalArgumentException("Withdrawal must be greater than 0.");
+            throw new BankSdNd.example.BsDnD.core.domain.exception.InvalidWithdrawalAmountException("Withdrawal must be greater than 0");
         }
         if (balance.compareTo(amount) < 0){
             throw  new InsufficientBalanceException("Insufficient balance.");

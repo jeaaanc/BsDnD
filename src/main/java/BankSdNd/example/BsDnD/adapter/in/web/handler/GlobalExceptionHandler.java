@@ -35,8 +35,8 @@ public class GlobalExceptionHandler {
      * Handles cases where a resource is not found (e.g., User ID, Account Number).
      * Resturn HTTP 404 (Not Found).
      */
-    @ExceptionHandler(UserNotFoundException.class)
-    public ProblemDetail hanldeUserNotFound(UserNotFoundException ex) {
+    @ExceptionHandler({UserNotFoundException.class, BankSdNd.example.BsDnD.core.domain.exception.AccountNotFoundException.class})
+    public ProblemDetail hanldeUserNotFound(Exception ex) {
 
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
         problemDetail.setTitle("Resource Not Found");

@@ -28,8 +28,11 @@ public class AccountInputCollector {
     }
 
     public String collectOriginAccount(GetAccountUseCase getAccountUseCase, BankUser currentUser) {
+
         while (true) {
+
             String typedAccount = inputUtils.readString(sc, ui.getMessage("prompt.origin_account"));
+
             if (getAccountUseCase.isAccountNumberOwner(typedAccount, currentUser.getId())) {
                 return typedAccount;
             }
@@ -54,7 +57,9 @@ public class AccountInputCollector {
     }
 
     public char[] captureTransactionPassword() {
+
         char[] rawPassword = null;
+
         try {
             ui.showConfirmPassword();
             rawPassword = PasswordUtils.catchPassword(ui.getMessage("prompt.transaction_password"));
@@ -66,6 +71,7 @@ public class AccountInputCollector {
 
             return rawPassword;
         } catch (IllegalArgumentException e) {
+
             if (rawPassword != null) {
                 Arrays.fill(rawPassword, '\0');
             }

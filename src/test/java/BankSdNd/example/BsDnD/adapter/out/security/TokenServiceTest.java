@@ -5,6 +5,7 @@ import BankSdNd.example.BsDnD.core.domain.model.BankUser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -17,63 +18,91 @@ import static org.junit.jupiter.api.Assertions.*;
 class TokenServiceTest {
 
     private TokenService tokenService;
+
     private final String secret = "my-very-secret-key-that-must-be-long-enough";
+    private final String VALID_CPF = "12345678900";
+    private final String ISSUER = "bsdnd-api";
+
+    private BankUser defaultUser;
 
     @BeforeEach
     void setUp() {
         tokenService = new TokenService();
         ReflectionTestUtils.setField(tokenService, "secret", secret);
+
+        defaultUser = BankUser.builder()
+                .cpf(VALID_CPF)
+                .build();
     }
 
     @Test
+    @DisplayName("Should generate a valid JWT token for a given user")
     void shouldGenerateToken() {
-        BankUser user = BankUser.builder().cpf("12345678900").build();
-        String token = tokenService.generateToken(user);
+
+        String token = tokenService.generateToken(defaultUser);
 
         assertNotNull(token);
-        assertFalse(token.isEmpty());
+        assertFalse(token.trim().isEmpty());
     }
 
     @Test
+    @DisplayName("Should validate token and return the user CPF subject")
     void shouldValidateToken() {
-        BankUser user = BankUser.builder().cpf("12345678900").build();
-        String token = tokenService.generateToken(user);
 
-        String cpf = tokenService.validateToken(token);
+        String token = tokenService.generateToken(defaultUser);
 
-        assertEquals("12345678900", cpf);
+        String subjectCpf = tokenService.validateToken(token);
+
+        assertEquals(VALID_CPF, subjectCpf);
     }
 
+    // ajustar mensagem logo menos !@@#%#¨$¨%&$@#$
     @Test
+    @DisplayName("Should throw InvalidTokenException when token string is completely invalid")
     void shouldThrowExceptionWhenTokenIsInvalid() {
-        assertThrows(InvalidTokenException.class, () -> tokenService.validateToken("invalid-token"));
+
+        String completelyInvalidToken = "invalid-token-format";
+
+        assertThrows(InvalidTokenException.class, () -> tokenService.validateToken(completelyInvalidToken));
+
+        // TODO: Se a sua exception tiver uma mensagem padrão, adicione a validação abaixo:
+        // assertEquals("Mensagem de erro esperada", exception.getMessage());
     }
 
     @Test
+    @DisplayName("Should throw InvalidTokenException when token signature is tampered")
     void shouldThrowExceptionWhenSignatureIsInvalid() {
-        BankUser user = BankUser.builder().cpf("12345678900").build();
-        String token = tokenService.generateToken(user);
-        
-        // Tamper with the token
-        String tamperedToken = token + "modified";
+
+        String validToken = tokenService.generateToken(defaultUser);
+        String tamperedToken = validToken + "modified";
 
         assertThrows(InvalidTokenException.class, () -> tokenService.validateToken(tamperedToken));
     }
 
     @Test
+    @DisplayName("Should throw InvalidTokenException when token is expired")
     void shouldThrowExceptionWhenTokenIsExpired() {
-        // Manually create an expired token
-        byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
-        SecretKey key = Keys.hmacShaKeyFor(keyBytes);
-        
-        String expiredToken = Jwts.builder()
-                .issuer("bsdnd-api")
-                .subject("12345678900")
-                .issuedAt(new Date(System.currentTimeMillis() - 10000))
-                .expiration(new Date(System.currentTimeMillis() - 5000)) // Expired 5 seconds ago
-                .signWith(key)
-                .compact();
+
+        String expiredToken = createExpiredToken();
 
         assertThrows(InvalidTokenException.class, () -> tokenService.validateToken(expiredToken));
+    }
+
+    private String createExpiredToken() {
+
+        byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
+        SecretKey key = Keys.hmacShaKeyFor(keyBytes);
+
+        long currentTime = System.currentTimeMillis();
+        Date pastIssueDate = new Date(currentTime - 10000);
+        Date pastExpirationDate = new Date(currentTime - 5000);
+
+        return Jwts.builder()
+                .issuer(ISSUER)
+                .subject(VALID_CPF)
+                .issuedAt(pastIssueDate)
+                .expiration(pastExpirationDate)
+                .signWith(key)
+                .compact();
     }
 }

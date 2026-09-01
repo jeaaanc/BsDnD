@@ -55,7 +55,7 @@ public class AccountService implements CreateAccountUseCase, GetAccountUseCase, 
                 .orElseThrow(() -> new UserNotFoundException("error.user_not_found"));
 
         if (!passwordEncoder.matches(transactionPassword, user.getTransactionPassword())) {
-            throw new BusinessException("error.password_incorrect");
+            throw new InvalidTrasctionPasswordException("error.password_incorrect");
         }
 
 
