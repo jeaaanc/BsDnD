@@ -14,6 +14,7 @@ import BankSdNd.example.BsDnD.core.domain.service.AccountNumberGenerator;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 
 /**
@@ -143,13 +144,13 @@ public class AccountService implements CreateAccountUseCase, GetAccountUseCase, 
         }
     }
 
-    public boolean isAccountOwner(Long accountId, Long userId) {
+    public boolean isAccountOwner(UUID accountId, UUID userId) {
         return accountRepository.findById(accountId)
                 .map(account -> account.isOwnedBy(userId))
                 .orElse(false);
     }
 
-    public boolean isAccountNumberOwner(String accountNumber, Long userId) {
+    public boolean isAccountNumberOwner(String accountNumber, UUID userId) {
         return accountRepository.findByAccountNumberAndActiveTrue(accountNumber)
                 .map(account -> account.isOwnedBy(userId))
                 .orElse(false);
@@ -164,7 +165,7 @@ public class AccountService implements CreateAccountUseCase, GetAccountUseCase, 
      * @throws AccountNotFoundException if the account ID is not found in the database.
      * @throws BusinessException        if the account balance is greater than zero.
      */
-    public void softDeleteAccount(Long accountId) {
+    public void softDeleteAccount(UUID accountId) {
 
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new AccountNotFoundException("error.account_not_found"));

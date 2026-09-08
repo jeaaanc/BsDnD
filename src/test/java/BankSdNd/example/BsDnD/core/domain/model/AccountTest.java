@@ -11,6 +11,7 @@ import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,7 +22,8 @@ class AccountTest {
 
     private final String ACCOUNT_NUMBER = "12345-6";
     private final String DESTINATION_ACCOUNT_NUMBER = "98765-4";
-    private final Long DEFAULT_USER_ID = 1L;
+    private static final UUID DEFAULT_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    private final java.util.UUID DESTINATION_USER_ID = java.util.UUID.fromString("00000000-0000-0000-0000-000000000002");
 
     @BeforeEach
     void setUp() {
@@ -122,7 +124,7 @@ class AccountTest {
         BigDecimal expectedSourceBalance = new BigDecimal("150.00");
 
         account.deposit(initialBalance);
-        Account destination = new Account(DESTINATION_ACCOUNT_NUMBER, BankUser.builder().id(2L).build());
+        Account destination = new Account(DESTINATION_ACCOUNT_NUMBER, BankUser.builder().id(DESTINATION_USER_ID).build());
         account.transferTo(destination, transferAmount);
 
         assertEquals(0,expectedSourceBalance.compareTo(account.getBalance()),"Soucer Balance mismatch after tranfer");
@@ -140,10 +142,11 @@ class AccountTest {
 
     @ParameterizedTest
     @NullSource
-    @ValueSource(longs = {2L, 99L})
+    @ValueSource(strings = {"00000000-0000-0000-0000-000000000002", "00000000-0000-0000-0000-000000000099"})
     @DisplayName("Should return false when checking ownership with incorrect or null user ID")
-    void shouldReturnFalseWhenCheckingOwnershipWithIncorrectOrNullUserID(Long invalidOwnerID) {
-
+    void shouldReturnFalseWhenCheckingOwnershipWithIncorrectOrNullUserID(String invalidOwnerIDStr) {
+        
+        java.util.UUID invalidOwnerID = invalidOwnerIDStr == null ? null : java.util.UUID.fromString(invalidOwnerIDStr);
         boolean isOwner = account.isOwnedBy(invalidOwnerID);
 
         assertFalse(isOwner);

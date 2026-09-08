@@ -1,9 +1,10 @@
 package BankSdNd.example.BsDnD.adapter.in.web.dto;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 public record AccountResponse(
-        Long id,
+        UUID id,
         String accountNumber,
         BigDecimal balance,
         UserUpdateDtos.UserResponse holder

@@ -28,7 +28,7 @@ public class UserUpdateDtos {
     ) {}
 
     public record UserResponse (
-            Long id,
+            java.util.UUID id,
             String name,
             String lastName,
             String phoneNumber

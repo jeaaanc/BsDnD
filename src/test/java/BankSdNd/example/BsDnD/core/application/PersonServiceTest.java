@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -43,7 +44,7 @@ class PersonServiceTest {
     private final String VALID_PASSWORD = "123456";
     private final String VALID_TX_PASSWORD = "1234";
     private final String ENCODED_PASSWORD = "encoded";
-    private final Long DEFAULT_USER_ID = 1L;
+    private static final UUID DEFAULT_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
 
 
     @Test

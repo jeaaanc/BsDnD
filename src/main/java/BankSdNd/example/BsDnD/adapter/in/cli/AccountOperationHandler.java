@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 @Component
 public class AccountOperationHandler {
@@ -119,7 +120,7 @@ public class AccountOperationHandler {
                 ui.showInvalidOption();
                 return;
             }
-            Long idToDelete = accounts.get(accountIndex - 1).getId();
+            UUID idToDelete = accounts.get(accountIndex - 1).getId();
 
             manageAccountUseCase.softDeleteAccount(idToDelete);
             ui.showAccountClosedSuccess();

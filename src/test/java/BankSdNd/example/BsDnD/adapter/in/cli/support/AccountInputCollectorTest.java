@@ -14,6 +14,7 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Scanner;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -37,7 +38,7 @@ class AccountInputCollectorTest {
     @InjectMocks
     private AccountInputCollector collector;
 
-    private final Long DEFAULT_USER_ID = 1L;
+    private static final UUID DEFAULT_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
 
 
     @Test

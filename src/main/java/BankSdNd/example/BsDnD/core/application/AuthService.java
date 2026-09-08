@@ -7,6 +7,7 @@ import BankSdNd.example.BsDnD.core.port.in.ManageCredentialsUseCase;
 import BankSdNd.example.BsDnD.core.port.in.dto.LoginCommand;
 import BankSdNd.example.BsDnD.core.port.out.BankUserRepositoryPort;
 import BankSdNd.example.BsDnD.core.port.out.PasswordEncoderPort;
+import java.util.UUID;
 
 
 /**
@@ -68,7 +69,7 @@ public class AuthService implements AuthenticateUserUseCase, ManageCredentialsUs
      * @throws UserNotFoundException    if no user is found for the given {@code userId}.
      * @throws InvalidPasswordException if the provided {@code rawPassword} is empty or does not match the user's stored password.
      */
-    public void validatePassword(Long userId, String rawPassword) {
+    public void validatePassword(UUID userId, String rawPassword) {
 
         if (rawPassword == null || rawPassword.isBlank()) {
             throw new InvalidPasswordException("error.password_required");
@@ -93,7 +94,7 @@ public class AuthService implements AuthenticateUserUseCase, ManageCredentialsUs
      * @throws InvalidPasswordException if the provided {@code oldPassword} does not match the stored password.
      * @throws InvalidInputException if any of the passwords are null/empty, or if the new password is the same as the old one.
      */
-    public void updatePassword(Long userId, String oldPassword, String newPassword) {
+    public void updatePassword(UUID userId, String oldPassword, String newPassword) {
 
         if (oldPassword == null || oldPassword.isBlank() || newPassword == null || newPassword.isBlank()) {
             throw new InvalidInputException("error.password_required");
@@ -129,7 +130,7 @@ public class AuthService implements AuthenticateUserUseCase, ManageCredentialsUs
      * @throws UserNotFoundException    if user is not found.
      * @throws InvalidPasswordException if old transaction password is incorrect.
      */
-    public void updateTransactionPassword(Long userId, String oldTransactionPassword, String newTransactionPassword) {
+    public void updateTransactionPassword(UUID userId, String oldTransactionPassword, String newTransactionPassword) {
         validatePasswordInputs(oldTransactionPassword, newTransactionPassword);
 
         if (!newTransactionPassword.matches("^\\d{4}$")) {
