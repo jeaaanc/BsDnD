@@ -12,6 +12,7 @@ import BankSdNd.example.BsDnD.core.domain.validation.CpfValidator;
 import BankSdNd.example.BsDnD.core.domain.validation.PhoneValidator;
 
 import java.util.List;
+import java.util.UUID;
 
 public class PersonService implements CreatePersonUseCase, ManagePersonUseCase, GetPersonUseCase {
 
@@ -54,7 +55,7 @@ public class PersonService implements CreatePersonUseCase, ManagePersonUseCase, 
         return personRepository.save(person);
     }
 
-    public BankUser updatePhoneNumber(Long userId, String newPhoneNumber) {
+    public BankUser updatePhoneNumber(UUID userId, String newPhoneNumber) {
         if (!PhoneValidator.isValidPhoneNumber(newPhoneNumber)) {
             throw new ValidationException("error.phone_invalid_format");
         }
@@ -70,7 +71,7 @@ public class PersonService implements CreatePersonUseCase, ManagePersonUseCase, 
         return personRepository.save(user);
     }
 
-    public BankUser updateName(Long userId, String newFirstName, String newLastName) {
+    public BankUser updateName(UUID userId, String newFirstName, String newLastName) {
         if (newFirstName == null || newFirstName.trim().isEmpty() || newLastName == null || newLastName.trim().isEmpty()) {
             throw new InvalidInputException("error.name_required");
         }

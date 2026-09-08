@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -30,7 +31,7 @@ class AuthServiceTest {
     private AuthService authService;
 
     private final String DEFAULT_CPF = "12345678900";
-    private final Long DEFAULT_USER_ID = 1L;
+    private static final UUID DEFAULT_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
 
     private final String VALID_PASSWORD = "password";
     private final String ENCODED_PASSWORD = "encoded";

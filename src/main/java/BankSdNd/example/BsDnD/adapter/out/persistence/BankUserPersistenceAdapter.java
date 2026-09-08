@@ -25,7 +25,7 @@ public class BankUserPersistenceAdapter implements BankUserRepositoryPort {
     }
 
     @Override
-    public Optional<BankUser> findById(Long id) {
+    public Optional<BankUser> findById(java.util.UUID id) {
         return repository.findById(id).map(this::toDomain);
     }
 

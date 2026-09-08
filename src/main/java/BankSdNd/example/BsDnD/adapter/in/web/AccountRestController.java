@@ -14,6 +14,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/accounts")
@@ -51,7 +52,7 @@ public class AccountRestController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAccount(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteAccount(@PathVariable UUID id) {
 
         manageAccountUseCase.softDeleteAccount(id);
 

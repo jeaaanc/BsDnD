@@ -3,6 +3,7 @@ package BankSdNd.example.BsDnD.core.domain.model;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 /**
  * Represents a user (customer) of the bank.
@@ -14,7 +15,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BankUser {
-    private Long id;
+    private UUID id;
     private String name;
     private String lastName;
     private String cpf;

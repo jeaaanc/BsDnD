@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/users")
@@ -49,7 +50,7 @@ public class PersonRestController {
 
     @PatchMapping("/{id}/name")
     public ResponseEntity<UserUpdateDtos.UserResponse> updateName(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @RequestBody @Valid UserUpdateDtos.Name request
     ) {
 
@@ -60,7 +61,7 @@ public class PersonRestController {
 
     @PatchMapping("/{id}/phone")
     public ResponseEntity<UserUpdateDtos.UserResponse> updatePhone(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @RequestBody @Valid UserUpdateDtos.Phone request
     ) {
 
@@ -71,7 +72,7 @@ public class PersonRestController {
 
     @PatchMapping("/{id}/password")
     public ResponseEntity<Void> updatePassword(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @RequestBody @Valid UserUpdateDtos.password request
     ) {
 
@@ -82,7 +83,7 @@ public class PersonRestController {
 
     @PatchMapping("/{id}/transaction-password")
     public ResponseEntity<Void> updateTransactionPassword(
-            @PathVariable Long id,
+            @PathVariable UUID id,
             @RequestBody @Valid UserUpdateDtos.TransactionPassword request
     ) {
 

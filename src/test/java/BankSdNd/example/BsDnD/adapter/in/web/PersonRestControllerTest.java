@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -49,8 +50,8 @@ class PersonRestControllerTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final String BASE_URL = "/api/users";
-    private final Long USER_ID = 1L;
-    private final String USER_URL = BASE_URL + "/" + USER_ID;
+    private static final UUID DEFAULT_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    private final String USER_URL = BASE_URL + "/" + DEFAULT_USER_ID;
 
     private final String DEFAULT_NAME = "John";
     private final String DEFAULT_LAST_NAME = "Wick";
@@ -76,7 +77,7 @@ class PersonRestControllerTest {
         );
 
         BankUser savedUser = BankUser.builder()
-                .id(USER_ID)
+                .id(DEFAULT_USER_ID)
                 .name(DEFAULT_NAME)
                 .lastName(DEFAULT_LAST_NAME)
                 .cpf(DEFAULT_CPF)
@@ -89,7 +90,7 @@ class PersonRestControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", USER_URL))
-                .andExpect(jsonPath("$.id").value(USER_ID))
+                .andExpect(jsonPath("$.id").value(DEFAULT_USER_ID.toString()))
                 .andExpect(jsonPath("$.name").value(DEFAULT_NAME));
     }
 
@@ -139,15 +140,15 @@ class PersonRestControllerTest {
         UserUpdateDtos.Name request = new UserUpdateDtos.Name(newName, newLastName);
 
         BankUser updatedUser = BankUser.builder()
-                .id(USER_ID).name(newName).lastName(newLastName).phoneNumber(DEFAULT_PHONE).build();
+                .id(DEFAULT_USER_ID).name(newName).lastName(newLastName).phoneNumber(DEFAULT_PHONE).build();
 
-        when(managePersonUseCase.updateName(eq(USER_ID), eq(newName), eq(newLastName))).thenReturn(updatedUser);
+        when(managePersonUseCase.updateName(eq(DEFAULT_USER_ID), eq(newName), eq(newLastName))).thenReturn(updatedUser);
 
         mockMvc.perform(patch(USER_URL + "/name")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(USER_ID))
+                .andExpect(jsonPath("$.id").value(DEFAULT_USER_ID.toString()))
                 .andExpect(jsonPath("$.name").value(newName))
                 .andExpect(jsonPath("$.lastName").value(newLastName));
     }
@@ -160,9 +161,9 @@ class PersonRestControllerTest {
         UserUpdateDtos.Phone request = new UserUpdateDtos.Phone(newPhone);
 
         BankUser updatedUser = BankUser.builder()
-                .id(USER_ID).name(DEFAULT_NAME).lastName(DEFAULT_LAST_NAME).phoneNumber(newPhone).build();
+                .id(DEFAULT_USER_ID).name(DEFAULT_NAME).lastName(DEFAULT_LAST_NAME).phoneNumber(newPhone).build();
 
-        when(managePersonUseCase.updatePhoneNumber(eq(USER_ID), eq(newPhone))).thenReturn(updatedUser);
+        when(managePersonUseCase.updatePhoneNumber(eq(DEFAULT_USER_ID), eq(newPhone))).thenReturn(updatedUser);
 
         mockMvc.perform(patch(USER_URL + "/phone")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -183,7 +184,7 @@ class PersonRestControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNoContent());
 
-        verify(manageCredentialsUseCase).updatePassword(eq(USER_ID), eq(DEFAULT_PASSWORD), eq(newPassword));
+        verify(manageCredentialsUseCase).updatePassword(eq(DEFAULT_USER_ID), eq(DEFAULT_PASSWORD), eq(newPassword));
     }
 
     @Test
@@ -191,13 +192,13 @@ class PersonRestControllerTest {
     void shouldUpdateTransactionPasswordSuccessfully() throws Exception {
 
         String newTxPassword = "4321";
-        UserUpdateDtos.TransactionPassword request = new UserUpdateDtos.TransactionPassword(DEFAULT_TX_PASSWORD, newTxPassword );
+        UserUpdateDtos.TransactionPassword request = new UserUpdateDtos.TransactionPassword(DEFAULT_TX_PASSWORD, newTxPassword);
 
         mockMvc.perform(patch(USER_URL + "/transaction-password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNoContent());
 
-        verify(manageCredentialsUseCase).updateTransactionPassword(eq(USER_ID), eq(DEFAULT_TX_PASSWORD), eq(newTxPassword));
+        verify(manageCredentialsUseCase).updateTransactionPassword(eq(DEFAULT_USER_ID), eq(DEFAULT_TX_PASSWORD), eq(newTxPassword));
     }
 }

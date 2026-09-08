@@ -18,6 +18,7 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Scanner;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -50,8 +51,8 @@ class UserProfileHandlerTest {
 
     private static MockedStatic<PasswordUtils> passwordUtilsMock;
 
-    private final long USER_ID = 1L;
-    private final BankUser defaultUSer = BankUser.builder().id(USER_ID).build();
+    private static final UUID DEFAULT_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    private final BankUser defaultUSer = BankUser.builder().id(DEFAULT_USER_ID).build();
 
     private final int OPTION_CLEAR_SCREEN = 0;
     private final int OPTION_VIEW_DATA = 1;
@@ -107,11 +108,11 @@ class UserProfileHandlerTest {
 
         String newFirstName = "New";
         String newLastName = "Name";
-        BankUser updatedUser = BankUser.builder().id(USER_ID).name(newFirstName).build();
+        BankUser updatedUser = BankUser.builder().id(DEFAULT_USER_ID).name(newFirstName).build();
         
         when(inputUtils.readInt(any(), any())).thenReturn(OPTION_CHANGE_NAME, OPTION_GO_BACK);
         when(inputUtils.readString(eq(scanner), any())).thenReturn(newFirstName, newLastName);
-        when(managePersonUseCase.updateName(USER_ID, newFirstName, newLastName)).thenReturn(updatedUser);
+        when(managePersonUseCase.updateName(DEFAULT_USER_ID, newFirstName, newLastName)).thenReturn(updatedUser);
 
         BankUser result = userProfileHandler.showUserProfile(defaultUSer);
 
@@ -129,7 +130,7 @@ class UserProfileHandlerTest {
         
         when(inputUtils.readInt(any(), any())).thenReturn(OPTION_CHANGE_NAME, OPTION_GO_BACK);
         when(inputUtils.readString(eq(scanner), any())).thenReturn(newFirstName, newLastName);
-        when(managePersonUseCase.updateName(USER_ID, newFirstName, newLastName)).thenThrow(new UserNotFoundException(errorMessage));
+        when(managePersonUseCase.updateName(DEFAULT_USER_ID, newFirstName, newLastName)).thenThrow(new UserNotFoundException(errorMessage));
 
         BankUser result = userProfileHandler.showUserProfile(defaultUSer);
 
@@ -142,11 +143,11 @@ class UserProfileHandlerTest {
     void shouldProcessPhoneChangeSuccessfully() {
 
         String newPhoneNumber = "11999999999";
-        BankUser updatedUser = BankUser.builder().id(USER_ID).phoneNumber(newPhoneNumber).build();
+        BankUser updatedUser = BankUser.builder().id(DEFAULT_USER_ID).phoneNumber(newPhoneNumber).build();
         
         when(inputUtils.readInt(any(), any())).thenReturn(OPTION_CHANGE_PHONE, OPTION_GO_BACK);
         when(inputUtils.readString(eq(scanner), any())).thenReturn(newPhoneNumber);
-        when(managePersonUseCase.updatePhoneNumber(USER_ID, newPhoneNumber)).thenReturn(updatedUser);
+        when(managePersonUseCase.updatePhoneNumber(DEFAULT_USER_ID, newPhoneNumber)).thenReturn(updatedUser);
 
         BankUser result = userProfileHandler.showUserProfile(updatedUser);
 
@@ -172,7 +173,7 @@ class UserProfileHandlerTest {
         BankUser result = userProfileHandler.showUserProfile(defaultUSer);
 
         assertNull(result); // returns null because password change requires logout
-        verify(manageCredentialsUseCase).updatePassword(USER_ID, oldPassword, newPassword);
+        verify(manageCredentialsUseCase).updatePassword(DEFAULT_USER_ID, oldPassword, newPassword);
         verify(ui).showProfilePasswordChangeSuccess();
     }
     
@@ -194,7 +195,7 @@ class UserProfileHandlerTest {
         BankUser result = userProfileHandler.showUserProfile(defaultUSer);
 
         assertEquals(defaultUSer, result);
-        verify(manageCredentialsUseCase).updateTransactionPassword(USER_ID, oldPassword, newPassword);
+        verify(manageCredentialsUseCase).updateTransactionPassword(DEFAULT_USER_ID, oldPassword, newPassword);
         verify(ui, times(2)).print(any());
     }
 

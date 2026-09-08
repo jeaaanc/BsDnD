@@ -4,11 +4,12 @@ import BankSdNd.example.BsDnD.core.domain.exception.InsufficientBalanceException
 import BankSdNd.example.BsDnD.core.domain.exception.InvalidDepositAmountException;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 
 public class Account {
 
-    private Long id;
+    private UUID id;
     private String accountNumber;
     private BigDecimal balance;
     private BankUser holder;
@@ -22,7 +23,7 @@ public class Account {
         this.balance = BigDecimal.ZERO;
     }
 
-    public boolean isOwnedBy(Long userId) {
+    public boolean isOwnedBy(UUID userId) {
         return this.holder != null && this.holder.getId().equals(userId);
     }
 
@@ -48,7 +49,7 @@ public class Account {
         destination.deposit(amount);
     }
 
-    public void setId(Long id) {
+    public void setId(UUID id) {
         this.id = id;
     }
 
@@ -56,7 +57,7 @@ public class Account {
         this.balance = balance;
     }
 
-    public Long getId() {
+    public UUID getId() {
         return id;
     }
 

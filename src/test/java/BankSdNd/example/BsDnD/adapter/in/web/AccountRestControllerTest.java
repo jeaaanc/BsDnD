@@ -27,6 +27,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -54,7 +55,8 @@ class AccountRestControllerTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private final Long USER_ID = 1L;
+
+    private static final UUID DEFAULT_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
     private final String USER_CPF = "12345678909";
     private final String ACCOUNT_NUMBER = "12345-6";
     private final String VALID_PASSWORD = "1234";
@@ -66,14 +68,14 @@ class AccountRestControllerTest {
     @BeforeEach
     void setUp() {
         defaultUser = new BankUser();
-        defaultUser.setId(USER_ID);
+        defaultUser.setId(DEFAULT_USER_ID);
         defaultUser.setCpf(USER_CPF);
         defaultUser.setName("John");
         defaultUser.setLastName("Wick");
         defaultUser.setPhoneNumber("11322441000");
 
         defaultAccount = new Account(ACCOUNT_NUMBER, defaultUser);
-        defaultAccount.setId(USER_ID);
+        defaultAccount.setId(DEFAULT_USER_ID);
         defaultAccount.setBalance(BigDecimal.ZERO);
 
         mockMvc = MockMvcBuilders.standaloneSetup(accountRestController)
@@ -104,7 +106,7 @@ class AccountRestControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(USER_ID))
+                .andExpect(jsonPath("$.id").value(DEFAULT_USER_ID.toString()))
                 .andExpect(jsonPath("$.accountNumber").value(ACCOUNT_NUMBER))
                 .andExpect(jsonPath("$.balance").value(0))
                 .andExpect(jsonPath("$.holder.name").value("John"));
@@ -149,7 +151,7 @@ class AccountRestControllerTest {
 
         mockMvc.perform(get(ACCOUNTS_URL))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(USER_ID))
+                .andExpect(jsonPath("$[0].id").value(DEFAULT_USER_ID.toString()))
                 .andExpect(jsonPath("$[0].accountNumber").value(ACCOUNT_NUMBER));
     }
     
@@ -157,9 +159,9 @@ class AccountRestControllerTest {
     @DisplayName("Should soft delete account successfully")
     void shouldSoftDeleteAccountSuccessfully() throws Exception {
 
-        mockMvc.perform(delete(ACCOUNTS_URL + "/1"))
+        mockMvc.perform(delete(ACCOUNTS_URL + "/" + DEFAULT_USER_ID.toString()))
                 .andExpect(status().isNoContent());
 
-        verify(manageAccountUseCase).softDeleteAccount(USER_ID);
+        verify(manageAccountUseCase).softDeleteAccount(DEFAULT_USER_ID);
     }
 }

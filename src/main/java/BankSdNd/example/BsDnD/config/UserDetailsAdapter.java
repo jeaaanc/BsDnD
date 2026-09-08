@@ -48,7 +48,7 @@ public record UserDetailsAdapter(BankUser user) implements UserDetails {
         return true;
     }
     
-    public Long getId() {
+    public java.util.UUID getId() {
         return user.getId();
     }
 }
