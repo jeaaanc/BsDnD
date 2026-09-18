@@ -1,0 +1,61 @@
+services:
+
+  db:
+    image: mysql:8.0
+    container_name: mysql-bsdnd
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - bsdnd-network
+    volumes:
+      - db_data:/var/lib/mysql
+
+  app:
+    build: .
+    container_name: bsdnd-app
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - "8080:8080"
+    stdin_open: true
+    tty: true
+    command: java -jar app.jar --cli
+    networks:
+      - bsdnd-network
+
+  adminer:
+    image: adminer
+    container_name: adminer-bsdnd
+    restart: always
+    depends_on:
+      - db
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+    ports:
+      - "8081:8080"
+    networks:
+      - bsdnd-network
+
+networks:
+  bsdnd-network:
+    driver: bridge
+
+volumes:
+  db_data:
