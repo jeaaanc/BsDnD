@@ -37,6 +37,12 @@ services:
     stdin_open: true
     tty: true
     command: java -jar app.jar --cli
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
     networks:
       - bsdnd-network
 
